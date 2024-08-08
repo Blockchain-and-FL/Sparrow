@@ -1,4 +1,8 @@
 # Sparrow
+## Introduction
+## Ontology
+## 
+## Usage
 run in Eclipse 2022-04 
 Need to install Xtext plug-in, which you can choose to install in the marketplace or directly install Eclipse as a dsl developer.
 The main files of the DSL project are in org.xtext.example.sparrow files.
