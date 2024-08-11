@@ -18,7 +18,30 @@ Sparrow is developed with clear objectives to address specific challenges in the
 2. **Concise Code Generation**: Focused on generating concise codes to optimize gas consumption on the Ethereum network.
 3. **Extensibility**: Designed to automate and scale the performance of LC generation, with modular and reusable code for seamless functional integration.
 
-## Ontology
+
+Sparrow leverages the power of the Eclipse Modeling Framework (EMF) to construct a domain-specific ontology that underpins the generation of Smart Legal Contracts (SLCs). Our approach emphasizes clarity, reusability, and extensibility in the ontology design.
+
+## Core Ontology Components
+
+Sparrow's ontology is structured around the following components:
+
+- **Subject**: Represents involved entities in a contract, including parties and other stakeholders such as authenticators, regulators, and arbitrators.
+- **Object**: Targets the entities owned or triggered by the Subject, such as assets, messages, and status.
+- **Conditions**: A unified set of logic structures that control the performance and validity of contracts, without distinguishing between preconditions and postconditions.
+- **Operations**: Actions emitted by defined roles in the Subject, describing corresponding rights and obligations within the contract.
+- **Rules**: A composite set of terms covering essential elements like payment terms, delivery schedules, rights and obligations, dispute resolution, warranties, and other pertinent aspects of legal contracts.
+
+![system framework](picture/structure.png)
+
+## Design Principles
+
+Sparrow's ontology design follows the principles of:
+
+- **Decoupling**: Separating functional sets to enhance modularity and reusability.
+- **Aggregation**: Grouping related components to form coherent contract structures.
+- **Encapsulation**: Ensuring that the internal logic of components is well-defined and protected.
+
+By focusing on functional set construction rather than redundant processing, Sparrow's ontology is designed to be more reusable, concise, and extensible.
 
 
 ## Getting Started
