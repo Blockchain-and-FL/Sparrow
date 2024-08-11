@@ -8,7 +8,7 @@ Sparrow is an innovative framework designed to translate legal contracts into se
 - **SLC Development Module**: Automates the generation of SLCs, mapping specifications to Solidity code with precision, ensuring code integrity and efficiency.
 - **SLC Evaluation Module**: Conducts comprehensive testing and evaluation, comparing Sparrow's performance with existing solutions like CML and TA-SPESC.
 
-- ## System Objectives
+## System Objectives
 
 Sparrow is developed with clear objectives to address specific challenges in the field of smart contract generation:
 
@@ -68,4 +68,5 @@ Once the project is running, you can start using the Sparrow IDE by:
 3. Using the provided tools to generate and test smart contracts.
 
 For more detailed information about Sparrow's syntactic semantic design and mapping rules, you can learn about it from the article "Sparrow: An Expressive, Encapsulated, and Extensible Domain-Specific Language for Smart Legal Contracts".
+
 Enjoy developing with Sparrow!
