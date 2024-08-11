@@ -1,0 +1,48 @@
+ Standard Purchase Agreement
+(Based on SimplePurchase Agreement plus Property Rights and Breach Provisions)
+
+This Agreement is executed on the 1st day of October, 2000, between A, whose Ethereum address is 0x..., as the Buyer, B, whose Ethereum address is 0x..., as the Seller, and P, whose Ethereum address is 0x..., as the Platform, concerning the sale of goods as detailed herein.
+
+Subject of the Contract: The Buyer, A, agrees to purchase from the Seller, B, the following goods:
+- Product Name: thing
+- Unit Price: 100 currency units
+- Quantity: 1
+- Ownership: The goods shall remain the property of the Seller, B, until full payment is received.
+
+Contract Terms:
+- Delivery Date: The goods shall be delivered on or before the 5th day of October, 2000.
+- Delivery Location: The goods shall be delivered to the premises known as place.
+- Maximum Delay in Delivery: The Seller is allowed a grace period of 5 days for delivery, with a penalty of 0.05% daily interest on the total purchase price for each day of delay.
+- Confirmation of Receipt Period: The Buyer shall confirm receipt of the goods within 15 days of the goods' arrival.
+- Termination for Convenience Penalty Interest Rate: Should either party elect to terminate the contract without cause, they shall pay a penalty at the rate of 20% of the total purchase price.
+- Total Payment for Goods: The total purchase price for the goods is 100 currency units.
+
+Clauses:
+
+1. Payment and Confirmation of Purchase: The Buyer, A, shall confirm the purchase and pay the total amount to the Platform, P, on or before the signing of this Agreement.
+
+2. Seller's Delivery Obligation: Upon receipt of payment, the Seller, B, shall dispatch the goods according to the agreed Delivery Date.
+
+3. Seller's Delay and Penalty: In the event the Seller, B, is delayed but delivers within 5 days, they shall pay the Buyer, A, the daily penalty for the delay before dispatching the goods.
+
+4. Breach by Seller - Termination Penalty: If the Seller, B, fails to deliver beyond the allowed delay, they shall pay the Buyer, A, the termination penalty as per the Contract Terms.
+
+5. Platform's Role in Refund and Termination: Should the Seller breach the terms and the Buyer choose to terminate, the Platform, P, shall refund the Buyer the total purchase price and the Agreement shall be terminated.
+
+6. Confirmation of Receipt and Transfer of Ownership: Upon the Buyer's confirmation of receipt within the stipulated period, the Platform, P, shall transfer the payment to the Seller, B, and the ownership of the goods shall pass to the Buyer, A.
+
+7. Automatic Payment and Ownership Transfer: If the Buyer fails to confirm receipt within 15 days, the Platform, P, shall automatically transfer the payment to the Seller, B, and the ownership of the goods shall pass to the Buyer, A.
+
+8. Mutual Termination: Either party may terminate this Agreement without cause by paying the stipulated termination penalty to the other party, after which the Platform, P, shall process the refund or penalty payment and the Agreement shall be terminated.
+
+Default and Termination Terms: The terms outlined above shall govern any delays, breaches, or terminations of this Agreement. The party at fault shall bear the corresponding legal responsibilities and compensate the non-breaching party for any losses incurred.
+
+Governing Law and Arbitration: This Agreement is governed by the laws of the jurisdiction where the Platform, P, is incorporated. Any disputes arising out of this Agreement shall be resolved by arbitration in accordance with the rules of the agreed arbitration institution.
+
+IN WITNESS WHEREOF, the parties have executed this Standard Purchase Agreement on the date first above written.
+
+Signed by:
+
+- Buyer: A (Signature / Ethereum Signature)
+- Seller: B (Signature / Ethereum Signature)
+- Platform: P (Authorized Signature / Ethereum Signature)
