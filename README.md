@@ -1,6 +1,7 @@
 # Sparrow
 ## Introduction
 Sparrow is an innovative framework designed to translate legal contracts into secure and efficient smart contracts on the Ethereum blockchain. Our system streamlines the process of Smart Legal Contract (SLC) design and development, ensuring enhanced expressiveness, concise code generation, and extensibility.
+![system framework](picture/general.png)
 
 ## Key Features
 
