@@ -1,7 +1,35 @@
 # Sparrow
 ## Introduction
+Sparrow is an innovative framework designed to translate legal contracts into secure and efficient smart contracts on the Ethereum blockchain. Our system streamlines the process of Smart Legal Contract (SLC) design and development, ensuring enhanced expressiveness, concise code generation, and extensibility.
+
+## Key Features
+
+- **Model Design Module**: Utilizes an ontology metamodel and logical process structure to formalize the semantics and syntax of legal contracts, minimizing ambiguity in natural language.
+- **SLC Development Module**: Automates the generation of SLCs, mapping specifications to Solidity code with precision, ensuring code integrity and efficiency.
+- **SLC Evaluation Module**: Conducts comprehensive testing and evaluation, comparing Sparrow's performance with existing solutions like CML and TA-SPESC.
+
+- ## System Objectives
+
+Sparrow is developed with clear objectives to address specific challenges in the field of smart contract generation:
+
+1. **Enhanced Contract Expression**: Sparrow enhances the expression of legal contracts, ensuring broad compatibility and accurate functional requirement representation.
+2. **Concise Code Generation**: Focused on generating concise codes to optimize gas consumption on the Ethereum network.
+3. **Extensibility**: Designed to automate and scale the performance of LC generation, with modular and reusable code for seamless functional integration.
+
 ## Ontology
-## 
+
+
+## Getting Started
+
+To get started with Sparrow, follow these steps:
+
+1. **Installation**: Ensure you have the latest version of Eclipse IDE with Xtext plugin installed.
+2. **Project Setup**: Import the Sparrow project into your workspace.
+3. **Model Design**: Use the Model Design Module to translate your legal contracts into formal specifications.
+4. **Code Generation**: Leverage the SLC Development Module to generate your smart contracts.
+5. **Evaluation**: Utilize the SLC Evaluation Module to test and evaluate your SLCs.
+
+   
 ## Setup and Usage Guide
 To get started with the Sparrow Framework in Eclipse, follow these step-by-step instructions:
 
