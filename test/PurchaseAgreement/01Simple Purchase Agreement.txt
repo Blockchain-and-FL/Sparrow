@@ -1,0 +1,40 @@
+ Simple Purchase Agreement
+
+This Agreement is executed on the 1st day of October, 2000, between A, identified by the Ethereum address 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4, as the Buyer; B, identified by the Ethereum address 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2, as the Seller; and P, identified by the Ethereum address 0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db, as the Platform, for the sale of the following product:
+
+- Product Name: thing
+- Unit Price: 100 currency units
+- Quantity: 1
+
+Contract Terms:
+- Delivery Date: The goods shall be delivered on the 5th day of October, 2000.
+- Delivery Location: The place of delivery shall be <place>.
+- Confirmation of Receipt Period: The Buyer shall have a period of 15 days to confirm receipt of the goods.
+- Total Payment for Goods: The total payment for the goods is 100 currency units.
+- Execution Date: This Agreement is entered into on the 1st day of October, 2000.
+
+Clauses:
+
+1. Payment and Confirmation of Purchase: Prior to the Delivery Date, the Buyer, A, confirms the purchase and pays the total payment to the Platform, P.
+
+2. Seller's Delivery Commitment: Following the receipt of payment, the Seller, B, shall dispatch the goods in accordance with the Delivery Date.
+
+3. Platform's Confirmation of Delivery: After the goods have been dispatched, the Platform, P, shall confirm the arrival of the goods.
+
+4. Buyer's Confirmation of Receipt: Upon confirmation of delivery by the Platform, the Buyer, A, shall confirm receipt of the goods within the Confirmation of Receipt Period.
+
+5. Completion of Transaction: Once the Buyer confirms receipt, the Platform, P, shall transfer the payment to the Seller, B, and this Agreement shall be deemed complete.
+
+6. Automatic Completion in Case of No Confirmation: If the Buyer fails to confirm receipt within the Confirmation of Receipt Period, the Platform, P, shall transfer the payment to the Seller after the expiration of the period, and this Agreement shall be deemed complete.
+
+Default and Termination Terms: In the event of any breach of contract terms, the defaulting party shall be liable for penalties as stipulated herein and shall compensate the non-defaulting party for any losses incurred.
+
+Governing Law and Dispute Resolution: This Agreement shall be governed by and construed in accordance with the laws of the jurisdiction where the Platform, P, is registered. Any disputes arising out of or in connection with this Agreement shall be resolved amicably, or failing that, by arbitration in accordance with the rules of the arbitration institution agreed upon by both parties.
+
+IN WITNESS WHEREOF, the parties have executed this Simple Purchase Agreement on the date first written above.
+
+Signed by:
+
+- Buyer: A (Ethereum Signature)
+- Seller: B (Ethereum Signature)
+- Platform: P (Authorized Signature)
