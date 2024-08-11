@@ -1,13 +1,13 @@
 # Sparrow
 ## Introduction
 Sparrow is an innovative framework designed to translate legal contracts into secure and efficient smart contracts on the Ethereum blockchain. Our system streamlines the process of Smart Legal Contract (SLC) design and development, ensuring enhanced expressiveness, concise code generation, and extensibility.
-![system framework](picture/general.png)
 
 ## Key Features
 
 - **Model Design Module**: Utilizes an ontology metamodel and logical process structure to formalize the semantics and syntax of legal contracts, minimizing ambiguity in natural language.
 - **SLC Development Module**: Automates the generation of SLCs, mapping specifications to Solidity code with precision, ensuring code integrity and efficiency.
 - **SLC Evaluation Module**: Conducts comprehensive testing and evaluation, comparing Sparrow's performance with existing solutions like CML and TA-SPESC.
+![system framework](picture/general.png)
 
 ## System Objectives
 
