@@ -18,7 +18,7 @@ To work with Sparrow, you need to have the Xtext plugin installed in Eclipse. Yo
 ### Import Sparrow Project
 1. Open Eclipse and select `File` > `Import`.
 2. Choose `General` > `Existing Projects into Workspace` and click `Next`.
-3. Browse to the location of your Sparrow project and follow the prompts to import it.
+3. Browse to the location of the Sparrow project and follow the prompts to import it.
 
 ### Understanding the Project Structure
 The main files of the Sparrow DSL project are located in the `org.xtext.example.sparrow` package. Here's a brief overview:
