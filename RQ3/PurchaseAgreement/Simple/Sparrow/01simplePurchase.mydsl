@@ -1,0 +1,58 @@
+Contract simplePurchase{
+	PA Person
+	Token token{
+	  string name,	
+	  uint number,
+	  ufixed unit_price
+	}
+	init {
+		s Person Buyer = ('A',
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		s Person Seller = ('B',
+			a'0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2')
+		s Person Platform = ('P',
+			a'0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db')
+		o token Thing =('thing',1,100) 
+	}
+	ContractMessage{
+	  string place='place',
+	  date giveTime=2000/10/05,00:00,
+	  date signTime=2000/10/01,00:00,
+	  uint price=100,
+	  duration period=15 days
+	}
+	
+	Operations[
+		end:change(ContractState,finish)
+	]
+	
+	Rule{		
+		
+		rule1:
+		Con: !isTime(giveTime),
+		Buyer transfer(Platform,price);
+		
+		rule2:
+		Con: isDone(rule1) and timeSub(now,giveTime,1 days,<),
+		Seller;
+		
+		rule3:
+		Con: isDone(rule2),
+		Platform;
+		
+		rule4:
+		Con: within 15 days after rule3,
+		Buyer;
+		
+		rule5:
+		Con: isDone(rule4),
+		Platform transfer(Seller,price) and end;
+		
+		rule6:
+		Con: isDone(rule3) and isTime(getRuleTime(rule3)+15days),
+		Platform transfer(Seller,price) and end
+		
+	}
+	
+	require:isDone,isTime,isTrue,transfer,timeSub;
+}
