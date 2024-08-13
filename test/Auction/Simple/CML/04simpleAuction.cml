@@ -1,0 +1,71 @@
+namespace cml.examples
+
+import cml.generator.annotation.solidity.*
+
+@PullPayment
+contract SimpleAuction
+	Party highestBidder
+	Party auctioneer
+	Party platform
+	Integer commision
+	Integer reservePrice
+	Integer highestBid
+	DateTime biddingStart
+	Duration biddingTime
+	Boolean ended
+		
+	clause rule1
+		party auctioneer
+		may payCommision
+		
+	clause rule2
+		due after biddingStart
+		given !ended
+		party platform
+		may startBid
+	
+	//due after platform did satrtBid
+	clause rule3
+		due within biddingTime after biddingStart
+		given !ended
+		party anyone
+		may bid
+	
+	clause rule4
+		due within 12 hours after biddingStart.addDuration(biddingTime)
+		given !ended
+		party highestBidder
+		may payHighest
+		
+	clause rule5
+		due after highestBidder did payHighest
+		given !ended
+		party platform
+		may endContract
+		
+	action init(Party _highestBidder,Party _auctioneer,Integer _commision,Integer _reservePrice,Integer _highestBid,String _ownership,
+	Duration _biddingTime,DateTime _biddingStart)
+		highestBidder=_highestBidder
+		auctioneer=_auctioneer
+		commision=_commision
+		reservePrice=_reservePrice
+		highestBid=_highestBid
+		biddingTime = _biddingTime
+		biddingStart=_biddingStart
+		
+	action payCommision()
+		transfer(platform,commision)
+		
+	action startBid()
+
+	action bid(TokenTransaction t)
+		ensure(t.amount > highestBid, "There already is a higher bid.")
+		highestBidder = caller
+		highestBid = t.amount
+		
+	action payHighest()
+		transfer(platform, highestBid)
+		
+	action endContract()
+		ended=true
+		transfer(auctioneer,highestBid)	
