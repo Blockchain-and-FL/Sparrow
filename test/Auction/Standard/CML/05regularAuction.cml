@@ -1,0 +1,103 @@
+namespace cml.examples
+
+import cml.generator.annotation.solidity.*
+
+@PullPayment
+contract RegularAuction
+	Party highestBidder
+	Party auctioneer
+	Party platform
+	Integer commision
+	Integer reservePrice
+	Integer highestBid
+	DateTime biddingStart
+	Duration biddingTime
+	Duration lateTime1
+	Duration lateTime2
+	Boolean ended
+	Integer faultIR
+	String ownership
+		
+	clause rule1
+		party auctioneer
+		may payCommision
+		
+	clause rule2
+		due after biddingStart
+		given !ended
+		party platform
+		may startBid
+	
+	clause rule3
+		due within biddingTime after biddingStart
+		given !ended
+		party anyone
+		may bid
+	
+	clause rule4
+		due within 12 hours after biddingStart.addDuration(biddingTime)
+		given !ended
+		party highestBidder
+		may payHighest
+		
+	//5,6together
+	clause rule5
+		due after highestBidder did payHighest
+		given !ended
+		party platform
+		may endContract
+	
+	//due after clause rule5 failed	
+	clause rule7
+		given !ended
+		party highestBidder
+		may payFault
+		
+	clause rule8
+		due after highestBidder did payFault
+		given !ended
+		party platform
+		may endContract2
+			
+	action init(Party _highestBidder,Party _auctioneer,Party _platform,Integer _commision,Integer _reservePrice,Integer _highestBid,String _ownership,
+	Duration _biddingTime,Duration _lateTime1,Duration _lateTime2,Integer _faultIR,
+	DateTime _biddingStart)
+		highestBidder=_highestBidder
+		auctioneer=_auctioneer
+		platform=_platform
+		commision=_commision
+		reservePrice=_reservePrice
+		highestBid=_highestBid
+		biddingTime = _biddingTime
+		lateTime1=_lateTime1
+		lateTime2=_lateTime2
+		faultIR=_faultIR
+		ownership=_ownership
+		biddingStart=_biddingStart
+		
+	action payCommision()
+		transfer(platform,commision)
+		ownership='platform'
+		
+	action startBid()
+
+	action bid(TokenTransaction t)
+		ensure(t.amount > highestBid, "There already is a higher bid.")
+		highestBidder = caller
+		highestBid = t.amount
+		
+	action payHighest()
+		transfer(platform, highestBid)
+		
+	action endContract()
+		ended=true
+		ownership='buyer'
+		transfer(auctioneer,highestBid)
+		
+	action payFault()
+		transfer(platform,faultIR*highestBid)
+		
+	action endContract2()
+		ended=true
+		ownership='seller'
+		transfer(auctioneer,highestBid*faultIR)
