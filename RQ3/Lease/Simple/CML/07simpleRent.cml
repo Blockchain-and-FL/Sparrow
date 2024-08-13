@@ -1,0 +1,100 @@
+namespace cml.examples
+
+import cml.generator.annotation.solidity.*
+
+@PullPayment
+contract SimpleRent	
+	Party lessor
+	Party lessee
+	Integer rent
+	Integer continueRent
+	Integer continueDays
+	Integer despoit
+	Duration payPeriod
+	Duration totalPeriod
+	DateTime startTime
+	DateTime payTime
+	DateTime finishTime
+	Boolean end
+	Boolean continueResult
+		
+	clause rule1
+		due before startTime
+		party lessee
+		may payOne
+		
+	clause rule2
+		due every payPeriod from startTime before finishTime
+		party lessee
+		may payRegular
+		
+	clause rule3
+		due before startTime.addDuration(totalPeriod)
+		party lessee
+		may confirmContinue
+		
+	clause rule4
+		due after lessee did confirmContinue
+		given !end
+		party lessor
+		may setContinue
+		
+	//表达不了行为
+	clause rule4_1
+		due after lessor did setContinue
+		given !end and continueResult
+		party lessor
+		may changeFinish
+		
+	clause rule4_2
+		due after lessor did setContinue
+		given !end and !continueResult
+		party lessor
+		may rejectChange
+	
+	clause rule5
+		due after startTime.addDuration(totalPeriod)
+		given !end
+		party lessor
+		may finishBack
+		
+	action init(Party _lessor,Party _lessee,Integer _rent,Integer _despoit,Duration _payPeriod,
+	Duration _totalPeriod,DateTime _startTime,DateTime _payTime,
+	DateTime _finishTime,Integer _continueRent,Integer _continueDays)
+		lessor=_lessor
+		lessee=_lessee
+		rent=_rent
+		despoit=_despoit
+		payPeriod=_payPeriod
+		totalPeriod=_totalPeriod
+		startTime=_startTime
+		payTime=_payTime
+		finishTime=_finishTime
+		continueRent=_continueRent
+		continueDays=_continueDays
+		
+		
+	action payOne()
+		transfer(lessor,despoit+rent)
+		
+	action payRegular()
+		transfer(lessor,rent)
+		payTime=payTime.addDuration(payPeriod)
+		
+	action confirmContinue(Integer Days)
+		continueDays=Days
+		transfer(lessor,continueRent*continueDays)
+		
+	action setContinue(Boolean result)
+		continueResult=result
+		
+	action changeFinish()
+		//finishTime.addDuration(continueDays)
+		
+	action rejectChange()
+		transfer(lessee,continueRent*continueDays)
+		
+	action finishBack()
+		transfer(lessee,despoit)
+		end=true
+		
