@@ -14,7 +14,7 @@ We conducted experiments with a diverse set of LCs, including purchase, auction,
 
 Our functionality comparison examines the ability of Sparrow, CML, and TA-SPESC to express constraints and actions within LCs. The results, as shown in Table IX, highlight Sparrow's superior capability to handle complex structures involving multiple constraints and actions.
 
-![Clause_structure_types](picture/tableIX.png)
+![Clause_structure_types](../picture/tableIX.png)
 
 ### Key Observations:
 - CML struggles with complex constraints (C6, C7) and auction actions (A2, A3).
