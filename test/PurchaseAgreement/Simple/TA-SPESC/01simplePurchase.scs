@@ -1,0 +1,65 @@
+contract simplePurchase{
+	
+ party Seller{
+  name:String
+  amount:Money
+  delivery()
+ }
+ 
+ party Buyer{
+  name:String
+  amount:Money
+  confirmBuy()
+  confirmGet()
+ }
+ 
+ party Platform{
+ 	amount:Money
+ 	confirmArrive()
+ 	endSale31()
+ 	endSale32()
+ }
+ 
+ thing: Thing
+ info1:contractInfo
+  
+ term no1: Buyer can confirmBuy
+ when before info1::giveDate
+ while transfer $info1::Price to Platform::amount.
+ 
+ term no2: Seller must delivery
+ when (before info1::giveDate) 
+ and (after Buyer did confirmBuy).
+ 
+ term no3: Platform can confirmArrive
+ when after Seller did delivery.
+ 
+ term no4: Buyer can confirmGet
+ when within 15 day after Platform did confirmArrive.
+ 
+ term no5: Platform can endSale31
+ when after Buyer did confirmGet
+ while transfer $info1::Price to Seller::amount.
+ 
+ //表达错误
+ term no6: Platform can endSale32
+ when after 15 day after Platform did confirmArrive
+ while transfer $info1::Price to Seller::amount.
+ 
+  type contractInfo{
+  giveDate:Date
+  Price:Integer
+  }
+ 
+  asset Thing{
+  info
+  {
+   name:String
+   unit_price:Integer
+   number:Integer
+  }
+  right{
+  }
+ }
+
+ }
