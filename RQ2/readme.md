@@ -26,8 +26,11 @@ We constructed an evaluation dataset comprising 10 general LC types, including v
 ### Security Analysis (Table VI)
 ![sec_eval](../picture/tableVI.png)
 - Using tools like Mythril, Smartcheck, and Slither, we identified vulnerabilities such as reentrancy and timestamp dependency in the generated SLCs.
+  
    **Reentrancy**: Identified due to publicly visible functions that could be transferred before assignments are completed.
+  
    **Timestamp Dependency**: Caused by the direct use of blockchain timestamps, which can be manipulated in certain conditions.
+  
 - Sparrow's design allows for fixed revision patterns to address these security concerns, ensuring the generated contracts can be made more secure with minimal refinement.
 
 ## Conclusion
