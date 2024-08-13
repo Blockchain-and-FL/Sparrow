@@ -1,0 +1,171 @@
+contract complexPurchase{
+	
+ party Seller{
+  name:String
+  amount:Money
+  delivery()
+  suspendDelivery1(lateDays:Integer)
+  suspendDelivery2()
+  endSale1()
+  chooseSolutionS(solutionS:String)
+  confirmResult(confirm:Boolean)
+  payCompensationS()
+ }
+ 
+ party Buyer{
+  name:String
+  amount:Money
+  confirmBuy()
+  confirmGet()
+  endSale2()
+  chooseSolutionB(solutionB:String)
+  BuyerSetResult(name:String,Compensation:Integer)
+  payCompensationB()
+ }
+ 
+ party Platform{
+ 	amount:Money
+ 	confirmArrive()
+ 	endSale31()
+ 	endSale32()
+ 	endSale33()
+ 	endSale34()
+ }
+ 
+ party ca{
+ 	check(checkResult:Boolean)
+ }
+ 
+ party aa{
+ 	aaSetResult(name:String,Compensation:Integer)
+ }
+ 
+ party ra{
+ 	pauseContract()
+ 	restartContract()
+ }
+ 
+ party court{
+ 	courtSetResult(name:String,Compensation:Integer)
+ }
+ 
+ thing: Thing
+ info1:contractInfo
+ lateIR:Float
+ finishIR:Float
+ result: Boolean
+ lateAmount:Float
+ confirmSolution:Boolean
+ solutionS: String
+ solutionB:String
+ faultName:String
+ Compensation:Integer
+ end:Boolean
+ 
+ term no1: ca can check
+ where result=checkResult.
+ 
+ term no2: Buyer can confirmBuy
+ when result=true
+ while transfer $info1::Price to Platform::amount.
+ 
+ term no3: Seller must delivery
+ when before info1::giveDate 
+ and after Buyer did confirmBuy.
+ 
+ term no4: Platform can confirmArrive
+ when after Seller did delivery or after Seller did suspendDelivery1.
+ 
+ term no5: Buyer can confirmGet
+ when within 15 day after Platform did confirmArrive
+ where thing::ownership = Buyer.
+ 
+ term no6: Platform can endSale31
+ when after Buyer did confirmGet
+ while transfer $info1::Price to Seller::amount.
+ 
+ //需要前面没做
+ term no7: Platform can endSale32
+ when after 15 day after Platform did confirmArrive
+ while transfer $info1::Price to Seller::amount
+ where thing::ownership = Buyer.
+ 
+ //不可表达
+ term no8: Seller can suspendDelivery1
+ when within 5 day after info1::giveDate and after Buyer did confirmBuy
+ //while transfer $info1::Price*lateIR*lateDays to Buyer::amount.
+ while transfer $info1::Price*lateIR to Buyer::amount.
+ 
+ //不可表达
+ term no9: Seller can suspendDelivery2
+ when after 5 day after info1::giveDate and after Buyer did confirmBuy
+ while transfer $info1::Price*lateIR to Buyer::amount.
+ 
+ term no10: Platform can endSale33
+ when after Seller did suspendDelivery2
+ while transfer $info1::Price to Buyer::amount.
+ 
+ term no11: Buyer can endSale2
+ while transfer $info1::Price*finishIR to Seller::amount.
+ 
+ term no12: Seller can endSale1
+ while transfer $info1::Price*finishIR to Buyer::amount.
+ 
+ term no13: Platform can endSale34
+ when after Buyer did endSale2 or after Seller did endSale1
+ while transfer $info1::Price to Buyer::amount.
+ 
+ term no14: ra can pauseContract
+ where end=true.
+ term no15: ra can restartContract
+ where end=false.
+ 
+ term no16: Buyer can chooseSolutionB.
+ term no17: Seller can chooseSolutionS.
+ 
+//无效
+ term no18: Buyer can BuyerSetResult
+ when solutionS='Negotiate' and solutionB='Negotiate'.
+ 
+ term no19: Seller can confirmResult
+ when after Buyer did  BuyerSetResult
+ where confirmSolution=confirm.
+ 
+ term no20_1: Seller can payCompensationS
+ when (confirmSolution=true or after court did courtSetResult
+ or aa did aaSetResult) and faultName=Seller::name
+ while transfer $Compensation to Buyer::amount.
+ 
+ term no20_2: Buyer can payCompensationB
+ when (confirmSolution=true or after court did courtSetResult
+ or aa did aaSetResult) and faultName=Buyer::name
+ while transfer $Compensation to Seller::amount.
+ 
+ //无效
+ term no21: court can courtSetResult
+ when solutionS='court' and solutionB='court'
+ where faultName=name and Compensation=Compensation.
+
+ //无效
+ term no23: aa can aaSetResult
+ when solutionS='aa' and solutionB='aa'
+ where faultName=name and Compensation=Compensation.
+ 
+  type contractInfo{
+  giveDate:Date
+  Price:Integer
+  }
+ 
+  asset Thing{
+  info
+  {
+   name:String
+   unit_price:Integer
+   number:Integer
+  }
+  right{
+   ownership:Right
+  }
+ }
+
+ }
