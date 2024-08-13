@@ -39,7 +39,8 @@ Sparrow's ontology design follows the principles of:
 
 - **Decoupling**: Separating functional sets to enhance modularity and reusability.
 - **Aggregation**: Grouping related components to form coherent contract structures.
-- **Encapsulation**: Ensuring that the internal logic of components is well-defined and protected.
+- **Encapsulation**: Sparrow encapsulates the internal logic of contract components to protect them from external interference and misuse.
+- **Polymorphism**: Leveraging polymorphism, Sparrow enables a single interface to support multiple underlying forms, allowing for more flexible and reusable contract elements.
 
 By focusing on functional set construction rather than redundant processing, Sparrow's ontology is designed to be more reusable, concise, and extensible.
 
