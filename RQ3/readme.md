@@ -9,6 +9,8 @@ Sparrow is designed to translate Legal Contracts (LCs) into Smart Legal Contract
 ## Experimental Setup
 
 We conducted experiments with a diverse set of LCs, including purchase, auction, and rent contracts, categorized by complexity levels: simple, regular, and complex. The complexity is defined by the presence of property rights, breach of contract clauses, and the intricacy of default resolution mechanisms.
+We have classified the catogories of clause structure types in Table VIII.
+![Clause_structure_types](../picture/tableVIII.png)
 
 ## Functionality Comparison
 
@@ -24,6 +26,7 @@ Our functionality comparison examines the ability of Sparrow, CML, and TA-SPESC 
 ## Efficiency Comparison
 
 Efficiency was assessed using objective criteria such as Proportion of Clauses (POC), Line Conversion Rate (LCR), and AST Conversion Rate (ACR). The results, detailed in Table V, indicate Sparrow's efficiency in modeling and code generation.
+![Clause_structure_types](../picture/tableX.png)
 
 ### Key Metrics:
 - **POC**: Measures the complexity of contract modeling capabilities.
