@@ -96,3 +96,15 @@ Once the project is running, you can start using the Sparrow IDE by:
 For more detailed information about Sparrow's syntactic semantic design and mapping rules, you can learn about it from the article "Sparrow: An Expressive, Encapsulated, and Extensible Domain-Specific Language for Smart Legal Contracts".
 
 Enjoy developing with Sparrow!
+
+## License
+
+Sparrow source code files are made available under the [Apache License, Version 2.0](LICENSE). Sparrow documentation files are made available under the [Creative Commons Attribution 4.0 International License (CC-BY-4.0)](https://creativecommons.org/licenses/by/4.0/). 
+
+All rights reserved. All trademarks referenced herein are the property of their respective owners. See [LF Projects Trademark Policy](https://lfprojects.org/trademark-policy/) for details.
+
+
+
+
+
+
