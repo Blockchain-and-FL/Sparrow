@@ -1,0 +1,437 @@
+grammar org.xtext.example.mydsl.Sparrow with org.eclipse.xtext.common.Terminals
+
+generate sparrow "http://www.xtext.org/example/mydsl/Sparrow"
+
+Model:
+	(
+	('import' packageName+=ID)*
+	'Contract' name=ID
+	('extends' extendName=ID)? 
+	'{'
+	subjects+=Subject*
+	objects+=Object*
+	group+=Group*
+	(initialize=Initialize)?
+	(contractMessage=ContractMessage)?
+	Conditions=Condition?
+	operations=Operation?
+	ruleStructures=RuleStructure?
+	(require=Require)?
+	'}')?
+	;
+
+Require:
+	'Require' ':' value+=(conditiontype|actiontype) (',' value+=(conditiontype|actiontype))* ';'
+;
+
+conditiontype:
+	"isTime"|"isTrue"|"logic"|"check"|"isCompleted"|"isDone"|"isRequest"|"compareString"|"timeSub"|"SetDate"
+;
+
+actiontype:
+	"transfer"|"changeState"
+;
+
+Initialize:
+	{Initialize} 'Init' '{'
+	(inits+=initExpressions)* ','
+	(inito+=initExpressiono)*
+	'}'
+;
+
+initExpressions:
+	subtype=[Subject] name=ID '=' '(' value+=Value (',' value+=Value)* ')'
+;
+
+initExpressiono:
+	obtype=[Object] name=ID '=' '(' value+=Value (',' value+=Value)* ')'
+;
+
+Group:
+	'Group' subtype=[Subject] name=ID '{'
+	value+=[initExpressions] (',' value+=[initExpressions])*
+	'}'
+;
+	
+Subject:
+	//this name is struct name
+	type=('RA'|'AA'|'CA'|'PA') name=ID	subjectExpression=SubjectExpression?
+;
+
+SubjectExpression:
+	'{'
+	keyValue+=keyvalue (',' keyValue+=keyvalue)*
+	'}'
+;
+
+ContractMessage:
+	'ContractMessage' 
+	'{'
+	message+=Message (',' message+=Message)*
+	'}'
+;
+
+Message:
+	type=keyvalue '=' value=Value
+;
+
+keyvalue:
+	//name=ID ':' value=Value 
+	type=type name=ID 
+;
+
+type:
+	"string"|"uint"|"address"|"int"|"bytes"|"bytes32"|"bool"|"fixed"|"ufixed"|"date"|"duration"	
+;
+
+Value:
+//这样的话，要表达NULL就要双引号了
+    AllNumber|Right|ThisDate|ThisBoolean|url|ThisDecimal|Address|ThisString|Duration|Now;
+
+Duration:
+	value=INT symbol=("years"|"months"|"days"|"hours"|"mins")
+;
+
+Now:
+	value='now'
+;
+
+ThisString:
+	value=STRING
+;
+
+Address:
+	'a' value=STRING
+;
+
+AllNumber:
+	number=INT
+;
+
+ThisDecimal:
+	value=DECIMAL
+;
+
+url:
+	value=URL_STRING
+;
+
+ThisBoolean:
+	value=BOOLEAN
+;
+
+ThisDate:
+	value=DATE
+;
+
+Right:
+	right=[initExpressions]
+;
+  
+DATE: 
+	year=INT '/' month=INT '/' day=INT ',' hour=INT  ':' min=INT
+;
+
+Object:
+	'Token' name=ID objectExpression=ObjectExpression
+;
+
+ObjectExpression:
+	'{'
+	keyValue+=keyvalue (',' keyValue+=keyvalue)*
+	'}'
+;
+
+Condition:
+	'Conditions''[' 
+	conditions+=ConditionLink (',' conditions+=ConditionLink)*
+	']'
+;
+
+ConditionLink:
+	name=ID ':' ((conditionExpression=SingleCondition)|(linkCondition=SingleLinkCondition))? (andOrLink+=AndOrCondition)*
+;
+
+AndOrCondition:
+	link=('and' | 'or') ((condition=SingleCondition)|(linkCondition=SingleLinkCondition))
+;
+
+Operation:
+	'Operations''[' 
+	operates+=OperateLink (',' operates+=OperateLink)*
+	']'
+;
+
+OperateLink:
+	name=ID ':' ((firstOperation=trueOperation)|(linkOperation=[OperateLink])) (andOrLink+=AndOrOperationLink)*
+;
+
+RuleStructure:
+	'Rules''{'
+	manyRuleExpression+=ManyRuleExpression+
+	'}'
+;
+
+ManyRuleExpression:
+	ExclusiveExpression|ParallelExpression|RegularRuleExpression|AdditionExpression
+;
+
+ParallelExpression:
+	'Exclusive''['
+	ruleExpression+=RuleExpression (';' ruleExpression+=RuleExpression)*
+	']'
+;
+
+ExclusiveExpression:
+	'Parallel''['
+	 ruleExpression+=RuleExpression (';' ruleExpression+=RuleExpression)*
+	']'
+;
+
+
+RegularRuleExpression:
+	ruleExpression+=RuleExpression (';' ruleExpression+=RuleExpression)*
+;
+
+AdditionExpression:
+	//全局允许触发条款或者限定时间内允许触发，默认是全局允许触发
+	'Additional''['
+	 ruleExpression+=RuleExpression (';' ruleExpression+=RuleExpression)*
+	']'
+;
+
+TotalCondition:
+	'If:'((condition=SingleCondition)|(linkCondition=SingleLinkCondition)) 
+  	andorcondition+=AndOrCondition* ','
+;
+
+SingleLinkCondition:
+	(no="!")? linkCondition=[ConditionLink]
+;
+
+TotalOperation:
+	{TotalOperation} (person=[initExpressions])? ('G' person2=[Group])? ((firstOperation=trueOperation)|(linkOperation=[OperateLink]))?
+	andor+=AndOrOperationLink*
+	timePoint=Timepoint? 
+	failresult=FailResult? 
+  	thenoperation+=ThenOperation*
+;
+
+AndOrOperationLink:
+	link='and' ((firstOperation=trueOperation)|(linkOperation=[OperateLink])) 
+;
+
+ThenOperation:
+  	'Then' ((followingOperation=trueOperation)|(linkOperation=[OperateLink])) 
+  	andor+=AndOrOperationLink*
+  	timePoint=Timepoint? failresult=FailResult? 
+;
+
+TotalExpression:
+  (set=messageExpression)?
+  (totalCondition=TotalCondition)? 
+   totalOperation=TotalOperation
+  (elseExpression=ElseExpression)?
+;
+
+ElseExpression:
+	'Else'
+	(set=messageExpression)?
+	(totalCondition=TotalCondition)?  
+	totalOperation=TotalOperation
+;
+
+RuleExpression:
+	(repeat="Repeat")?
+	 name=ID ':'
+	(set=messageExpression)?
+	(setdate=setDateExpression)?
+	(totalCondition=TotalCondition)? 
+	 totalOperation=TotalOperation
+	//加了这个以后多了好多警告，数都数不清，原本只有六个警告的
+	(subExpression+=SubExpression)*
+	(elseExpression=ElseExpression)?
+;
+
+setDateExpression:
+	'SetDate('message=ID')'
+;
+
+SubExpression:
+	'SubRule''{' totalExpression=TotalExpression'}'
+;
+
+//感觉可以把这个废弃，就和平行网关一样，其实就是完成一个rule但是没完成另一个rule
+FailResult:
+	'FailResult:' 
+	((followingOperation=trueOperation)|(linkOperation=[OperateLink]))
+    andor+=AndOrOperationLink*
+	timePoint=Timepoint?
+ 	thenoperation+=ThenOperation*
+;
+
+Timepoint:
+	WithinPoint|BeforePoint
+;
+
+WithinPoint:
+	'within' number=INT time=EachTime 'after' thing=[RuleExpression]
+;
+
+BeforePoint:
+	'before' ((lineTime=ThisDate)|(value=[keyvalue]))
+;
+
+SingleCondition:
+	(no="!")? condition=TrueCondition
+;
+
+TrueCondition:
+	isTime|logic|isTrue|isDone|checkExpression|Timepoint|CompareString|TimeSub;
+
+CompareString:
+	'compareString('valueA=MixExpression ',' valueB=MixExpression')'
+;
+
+TimeSub:
+	'timeSub('valueA=MixExpression ',' valueB=MixExpression? ('r' valueC=[RuleExpression])? ',' duration=Duration ',' compare=MATH_SYMBOL')'
+;
+
+EachTime:
+//	一个月按30天算
+	'years'|'months'|'days'|'hours'|'mins'
+;
+
+isTime:
+  {isTime} 'isTime('expression=MixExpression? ('r' value=[RuleExpression])? (symbol=ARITHMETIC_OPERATOR duration=Duration)?')';
+  
+logic:
+  'logic(' valueA=MixExpression ',' valueB=MixExpression ',' mathSymbol=MATH_SYMBOL')'
+;
+
+isTrue:
+  'isTrue('compare=SingleExpression')'	
+;
+
+isDone:
+  'isDone('name=[RuleExpression]')'
+;
+checkExpression:
+  'check('name=[Model]')'
+;
+
+
+MixExpression:
+	expression=SingleExpression (otherMixExpression+=OtherMixExpression)*
+;
+
+OtherMixExpression:
+	link=ARITHMETIC_OPERATOR expression=SingleExpression
+;
+
+SingleExpression:
+	RegularExpression | ThingExpression| OtherExpression |PersonExpression 
+	| RuleTimeExpression | FloatExpression | StringExpression
+	| PeriodExpression | GetPeriodExpression;
+
+PeriodExpression:
+	value=INT type=EachTime
+;
+
+GetPeriodExpression:
+	value=ID type=EachTime
+;
+
+RuleTimeExpression:
+	'getRuleTime(' value=[RuleExpression] ')'
+;
+
+OtherExpression:
+	value=ID
+;
+
+StringExpression:
+	'"' value=ID '"'
+;
+
+FloatExpression:
+	'f' value=ID
+;
+
+PersonExpression:
+	'p' value=[initExpressions]
+;
+	
+RegularExpression:
+   AllNumber|ThisDecimal|ThisBoolean|Now|ThisDate;
+  
+ThingExpression:
+	ObjectExpress|SubjectExpress
+;
+
+SubjectExpress:
+	's' subject=[initExpressions] '.' attribute=ID
+;
+
+ObjectExpress:
+	'o' object=[initExpressiono] '.' attribute=ID
+;
+	
+trueOperation:
+	transferExpression|changeExpression
+;
+
+messageExpression:
+	'SetMessage('everymassage+=everyMessage (',' everymassage+=everyMessage)*')'
+;
+
+everyMessage:
+	(symbol="new")? type=type message=ID
+;
+
+//这里也会有警告，在加了|value=[keyvalue]以后
+transferExpression:
+	'transfer('(person=[initExpressions]) ',' value=MixExpression ')'	
+;
+
+changeExpression:
+	changeContract|changeRule|otherchange|changeString|changeOther|changeAddress;
+
+changeString:
+	'assign(' changeThing=MixExpression ',' changeResult=MixExpression')'
+;
+
+otherchange:
+	//singleExpression的话就没有警告
+	'assign(' changeThing=MixExpression ',' changeResult=(MixExpression)')'
+;
+
+changeContract:
+	'assign(' 'ContractState' ',' changeResult=ContractState ')'
+;
+
+ContractState:
+	'start'|'pause'|'restart'|'terminate'|'finish'
+;
+
+changeRule:
+	'assign(' changeThing=[RuleExpression] ',' changeResult=BOOLEAN ')'
+;
+
+changeOther:
+	'change(' 'CM' changeThing=SingleExpression ',' changeResult=BOOLEAN ')'
+;
+
+changeAddress:
+	'assign(' changeThing=MixExpression ',' 'a' changeResult=(MixExpression)')'
+;
+
+BOOLEAN:
+	'true'|'false'
+;
+
+// Define MathSymbol rule
+terminal MATH_SYMBOL: ('>' | '<' | '>=' | '<=' |'=='|'!=');
+terminal ARITHMETIC_OPERATOR: '+' | '-' | '*' | '/';
+terminal URL_STRING: 'https://' ('a'..'z' | 'A'..'Z' | '0'..'9' | '.' | '-' | '/')+;
+terminal DECIMAL: (INT '.' INT) | ('.' INT);
