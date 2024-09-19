@@ -1,0 +1,54 @@
+Contract HouseRent{
+	PA Person
+	AA aa 
+	RA ra
+	Token House{string location, string useRight, string ownRight}
+	Init{
+		Person Landlord = ('LandlordA',a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		Person Tenant = ('TenantB',a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB')
+		aa aa = ('aa',a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB')
+		ra ra = ('ra',a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB'),
+		House house=('thing',1,'A') 
+	}
+	ContractMessage{
+		uint deposit=6000,
+		uint rent=6000,
+		duration pd=30 days,
+		duration mddt=7 days, 
+		duration mpdt=30 days
+	}
+	Conditions[completeDelivery: isDone(rule3) or isDone(rule4)]
+	Operations[payRegular: transfer(Landlord, rent) and assign(payTime, payTime+pd)]
+
+	Rules{
+	rule1: If: !isTime(startTime), Tenant transfer(Landlord, deposit+rent);
+	rule2: If: isTime(startTime) and !isDone(rule1), Landlord assign(ContractState, terminate);
+	rule3: If: !isTime(startTime) and isDone(rule1), Landlord assign(o house.useRight,s Tenant.name);
+	rule4: If: isTime(startTime) and !isDone(rule3) and !isTime(startTime+time1),
+    Landlord assign(o house.useRight,s Tenant.name) and transfer(Tenant, rent);
+	rule5: If: !isDone(rule3) and isTime(startTime+mddt),
+    Landlord transfer(Tenant, deposit+rent) and assign(ContractState, terminate);
+    Repeat rule6: If: completeDelivery and isTime(payTime+mpdt) and !isTime(payTime+mpdt+1 days), Tenant payRegular;
+	rule7: If: completeDelivery and !isDone(rule6) and isTime(payTime+pd+1 days) and !isTime(payTime+pd+mpdt),
+    Tenant transfer(Landlord, 2*rent) and assign(payTime, payTime+pd);
+	rule8: If: completeDelivery and !isDone(rule6) and !isDone(rule7) and isTime(payTime+pd+mpdt),
+    Landlord assign(ContractState,terminate);
+    rule9: SetMessage(new bool checkresult)
+    If: isTime(finishTime), Landlord assign(ContractState, terminate) and assignString(o house.useRight,s Landlord.name) 
+    SubRule{If: isTrue(checkresult), transfer(Tenant, deposit) and assign(ContractState, finish)
+    }
+	Additional[
+	rule10: 
+	SetMessage(string aaresult)
+	aa;
+	rule11: If: isDone(rule10) and compareString(aaresult, s Landlord.name),
+    Landlord transfer(Tenant, penalty) and assign(ContractState, terminate);
+	rule12: If: isDone(rule10) and compareString(aaresult, s Tenant.name),
+    Tenant transfer(Landlord, penalty) and assign(ContractState, terminate);
+	rule13: ra assign(ContractState, pause);
+    rule14: ra assign(ContractState, restart);
+    rule15: ra assign(ContractState, terminate)
+    ]
+	}
+	Require: isDone, isTime, compareString,transfer;
+}
