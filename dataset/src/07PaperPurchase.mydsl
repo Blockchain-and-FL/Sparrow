@@ -1,0 +1,92 @@
+Contract PaperPurchase{
+	PA Person
+	CA Ca
+	Token token{
+	  string name,
+	  string ID,	
+	  uint number,
+	  ufixed unit_price,
+	  uint price
+	}
+	init {
+		s Person Buyer = ('Shishou City Audit Office',
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		s Person Seller = ('Hongxiang Technology, Taipingfang Avenue, Shishou City',
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		s Ca Arbitration = ('arbitration institution',
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		o token Service =('paper','VWN Qin Pin 70g',60,190,11400) 
+	}
+	ContractMessage{
+	  string place='No. 186, Taipingfang Avenue, Shishou City',
+	  date giveTime=2022/11/17,00:00,
+	  string faultName='',
+	  ufixed amount=0,
+	  bool checkResult=false,
+	  duration period=30 days,
+	  uint dayNum=0,
+	  ufixed Proportion=0.03
+	}
+	
+	Conditions[
+		delivery1: isDone(rule2) And within 1 days after rule2 ,
+		delivery2: isDone(rule2_2) And within 1 days after rule2_2
+	]
+	
+	Operations[
+		end:change(ContractState,finish),
+		end2: change(ContractState,terminate)
+	]
+	
+	Rule{		
+		//卖家按照时间交货
+		rule2:
+		Con: logic(now,giveTime,==),
+		Seller;
+		
+		//卖家延迟交货但不超过30天
+		rule2_2:
+		setMessage(uint dayNum)
+		Con: isTime(giveTime) and !isTime(giveTime+period) and !isDone(rule2),
+		Seller transfer(Buyer,dayNum*Proportion*o Service.price)
+		
+		//卖家延迟交货超过30天，合约终止
+		rule2_3:
+		Con: isTime(giveTime+period) and !isDone(rule2) and !isDone(rule2_2),
+		Buyer change(ContractState,terminate);
+		
+		//买家确认收货，质量不合格退货且合约终止
+		rule3:
+		setMessage(bool checkResult)
+		Con: delivery1 or delivery2 ,
+		Buyer transfer(Seller,o Service.price) and end
+		sub{
+			Con:!isTrue(checkResult),
+			change(ContractState,terminate)
+		};
+		
+		//买家无理由退货且拒收货物
+		rule4:
+		Con: delivery1 or delivery2 and !isDone(rule3),
+		Buyer transfer(Seller,o Service.price*Proportion) and change(ContractState,terminate)
+		
+		
+		//仲裁机构仲裁过错方，过错方交罚金
+		Addition[
+		arbitrationClause:
+		setMessage(string faultName,ufixed amount)
+		Arbitration;
+		
+		buyer_fault:
+		Con: isDone(arbitrationClause) and logic(faultName,s Buyer.name,==),
+		Buyer transfer(Seller,amount) and end2;
+		
+		seller_fault:
+		Con: isDone(arbitrationClause) and logic(faultName,s Seller.name,==),
+		Seller transfer(Buyer,amount) and end2
+		]
+		
+	}
+	
+	require:isDone,isTime,isTrue,transfer;
+}

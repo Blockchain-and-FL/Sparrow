@@ -1,0 +1,106 @@
+Contract LightRent{
+	PA Person
+	Token token{
+	  string name,	
+	  uint price
+	}
+	init {
+		s Person Buyer = ('LuoTian County HuangMei Drama Group',
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		s Person Seller = ('GuangYing Electronic Products Sales Department, BaoHe District, HeTei City',
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		o token Service =('Performance services',64807) 
+	}
+	ContractMessage{
+	  ufixed extend1=10000,
+	  ufixed extend2=20000,
+	  ufixed default=7710,
+	  ufixed Proportion=0.4,
+	  uint dayNum=0,
+	  date signTime=2021/12/15,00:00,
+	  duration period=2 days,
+	  string signPlace='HuangGang City, HuBei Province, HeFei',
+	  date startTime=2021/12/20,00:00,
+	  date finishTime=2021/12/22,00:00,
+	  bool checkStatus=false,
+	  ufixed deviceAmount=0,
+	  ufixed defaultAmount=10000
+	}
+	
+	Rule{	
+		//支付定金
+		depositPay:
+		Con: !isTime(signTime+peroid),
+		Buyer transfer(Seller,Proportion*o Service.price);
+		
+		//未及时支付定金
+		depositPay_Late:
+		Con: isTime(signTime+peroid) and !isDone(depositPay),
+		Seller change(ContractState,terminate)
+		
+		//支付尾款
+		balancePay:
+		Con: isDone(depositPay) and logic(now,startTime,==),
+		Buyer transfer(Seller,o Service.price-Proportion*o Service.price)
+		
+		//交货
+		delivery:
+		Con:isDone(balancePay),
+		Seller;
+		
+		//确认收货
+		confirm:
+		Con:isDone(delivery),
+		Buyer;
+		
+		//不可抗原因交货失败
+		fail_delivery:
+		//交付延迟的天数
+		setMessage(new uint lateDay)
+		Con: !isDone(confirm) and isTime(startTime),
+		Seller transfer(Buyer,lateDay*default)
+		
+		//延期表演
+		extended:
+		setMessage(uint dayNum)
+		Con:isDone(confirm),
+		Buyer
+		sub{
+			Con:logic(dayNum,1,==),
+			transfer(Seller,extend1)
+		}
+		sub{
+			Con:logic(dayNum,1,!=),
+			transfer(Seller,extend1+extend2*dayNum-extend3)
+		};
+		
+		//检查设备状态
+		checkDevice:
+		setMessage(bool checkStatus,ufixed deviceAmount)
+		Con: isTime(finishTime+dayNum),
+		Seller;
+		
+		//设备完好，合约终止
+		status_good:
+		Con: isDone(checkDevice) and isTrue(checkStatus),
+		Buyer change(ContractState,finish);
+		
+		//设备有问题，赔钱，合约终止
+		status_bad:
+		Con:isDone(checkDevice) and !isTrue(checkStatus),
+		Buyer transfer(Seller,deviceAmount) and change(ContractState,finish);
+		
+		//卖家提前终止
+		terminate_Seller:
+		Con: !isTime(finishTime+dayNum),
+		Seller transfer(Buyer,defaultAmount) and change(ContractState,terminate);
+		
+		//买家提前终止
+		terminate_Buyer:
+		Con: !isTime(finishTime+dayNum),
+		Buyer transfer(Seller,defaultAmount) and change(ContractState,terminate)	
+
+	}
+	
+	require:isDone,isTime,isTrue,transfer;
+}
