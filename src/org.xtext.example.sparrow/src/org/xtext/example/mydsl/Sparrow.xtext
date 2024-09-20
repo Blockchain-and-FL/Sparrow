@@ -167,9 +167,9 @@ OperateLink:
 ;
 
 RuleStructure:
-	'Rules''['
+	'Rules''{'
 	manyRuleExpression+=ManyRuleExpression+
-	']'
+	'}'
 ;
 
 ManyRuleExpression:
