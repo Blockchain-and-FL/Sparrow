@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="sparrow" nsURI="http://www.xtext.org/example/mydsl/Sparrow"
+    nsPrefix="sparrow">
+  <eClassifiers xsi:type="ecore:EClass" name="Model">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="packageName" unique="false"
+        upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="extendName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subjects" upperBound="-1"
+        eType="#//Subject" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="objects" upperBound="-1"
+        eType="#//Object" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="group" upperBound="-1"
+        eType="#//Group" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="initialize" eType="#//Initialize"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="contractMessage" eType="#//ContractMessage"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="Conditions" eType="#//Condition"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="operations" eType="#//Operation"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ruleStructures" eType="#//RuleStructure"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="require" eType="#//Require"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Require">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" unique="false" upperBound="-1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Initialize">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="inits" upperBound="-1"
+        eType="#//initExpressions" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="inito" upperBound="-1"
+        eType="#//initExpressiono" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="initExpressions">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subtype" eType="#//Subject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" upperBound="-1"
+        eType="#//Value" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="initExpressiono">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="obtype" eType="#//Object"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" upperBound="-1"
+        eType="#//Value" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Group">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subtype" eType="#//Subject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" unique="false" upperBound="-1"
+        eType="#//initExpressions"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Subject">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subjectExpression" eType="#//SubjectExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SubjectExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="keyValue" upperBound="-1"
+        eType="#//keyvalue" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ContractMessage">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="message" upperBound="-1"
+        eType="#//Message" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Message">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//keyvalue"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//Value"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="keyvalue">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Value"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Duration" eSuperTypes="#//Value">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="symbol" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Now" eSuperTypes="#//Value #//RegularExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ThisString" eSuperTypes="#//Value">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Address" eSuperTypes="#//Value">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AllNumber" eSuperTypes="#//Value #//RegularExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="number" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ThisDecimal" eSuperTypes="#//Value #//RegularExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="url" eSuperTypes="#//Value">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ThisBoolean" eSuperTypes="#//Value #//RegularExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ThisDate" eSuperTypes="#//Value #//RegularExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//DATE"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Right" eSuperTypes="#//Value">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="right" eType="#//initExpressions"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DATE">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="year" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="month" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="day" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hour" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="min" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Object">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="objectExpression" eType="#//ObjectExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ObjectExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="keyValue" upperBound="-1"
+        eType="#//keyvalue" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Condition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="conditions" upperBound="-1"
+        eType="#//ConditionLink" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ConditionLink" abstract="true" interface="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="conditionExpression" eType="#//SingleCondition"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="linkCondition" eType="#//SingleLinkCondition"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="andOrLink" upperBound="-1"
+        eType="#//AndOrCondition" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AndOrCondition">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="link" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="condition" eType="#//SingleCondition"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="linkCondition" eType="#//SingleLinkCondition"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Operation">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="operates" upperBound="-1"
+        eType="#//OperateLink" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OperateLink">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="firstOperation" eType="#//trueOperation"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="linkOperation" eType="#//OperateLink"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="andOrLink" upperBound="-1"
+        eType="#//AndOrOperationLink" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RuleStructure">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="manyRuleExpression" upperBound="-1"
+        eType="#//ManyRuleExpression" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ManyRuleExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ruleExpression" upperBound="-1"
+        eType="#//RuleExpression" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ParallelExpression" eSuperTypes="#//ManyRuleExpression"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ExclusiveExpression" eSuperTypes="#//ManyRuleExpression"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RegularRuleExpression" eSuperTypes="#//ManyRuleExpression"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AdditionExpression" eSuperTypes="#//ManyRuleExpression"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TotalCondition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="condition" eType="#//SingleCondition"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="linkCondition" eType="#//SingleLinkCondition"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="andorcondition" upperBound="-1"
+        eType="#//AndOrCondition" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SingleLinkCondition">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="no" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="linkCondition" eType="#//ConditionLink"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TotalOperation">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="person" eType="#//initExpressions"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="person2" eType="#//Group"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="firstOperation" eType="#//trueOperation"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="linkOperation" eType="#//OperateLink"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="andor" upperBound="-1"
+        eType="#//AndOrOperationLink" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="timePoint" eType="#//Timepoint"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="failresult" eType="#//FailResult"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="thenoperation" upperBound="-1"
+        eType="#//ThenOperation" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AndOrOperationLink">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="link" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="firstOperation" eType="#//trueOperation"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="linkOperation" eType="#//OperateLink"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ThenOperation">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="followingOperation" eType="#//trueOperation"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="linkOperation" eType="#//OperateLink"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="andor" upperBound="-1"
+        eType="#//AndOrOperationLink" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="timePoint" eType="#//Timepoint"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="failresult" eType="#//FailResult"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TotalExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="set" eType="#//messageExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="totalCondition" eType="#//TotalCondition"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="totalOperation" eType="#//TotalOperation"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="elseExpression" eType="#//ElseExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ElseExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="set" eType="#//messageExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="totalCondition" eType="#//TotalCondition"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="totalOperation" eType="#//TotalOperation"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RuleExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="repeat" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="set" eType="#//messageExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="setdate" eType="#//setDateExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="totalCondition" eType="#//TotalCondition"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="totalOperation" eType="#//TotalOperation"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subExpression" upperBound="-1"
+        eType="#//SubExpression" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="elseExpression" eType="#//ElseExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="setDateExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="message" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SubExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="totalExpression" eType="#//TotalExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FailResult">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="followingOperation" eType="#//trueOperation"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="linkOperation" eType="#//OperateLink"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="andor" upperBound="-1"
+        eType="#//AndOrOperationLink" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="timePoint" eType="#//Timepoint"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="thenoperation" upperBound="-1"
+        eType="#//ThenOperation" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Timepoint" eSuperTypes="#//TrueCondition"/>
+  <eClassifiers xsi:type="ecore:EClass" name="WithinPoint" eSuperTypes="#//Timepoint">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="number" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="time" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="thing" eType="#//RuleExpression"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BeforePoint" eSuperTypes="#//Timepoint">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="lineTime" eType="#//ThisDate"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//keyvalue"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SingleCondition">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="no" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="condition" eType="#//TrueCondition"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TrueCondition"/>
+  <eClassifiers xsi:type="ecore:EClass" name="CompareString" eSuperTypes="#//TrueCondition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="valueA" eType="#//MixExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="valueB" eType="#//MixExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TimeSub" eSuperTypes="#//TrueCondition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="valueA" eType="#//MixExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="valueB" eType="#//MixExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="valueC" eType="#//RuleExpression"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="duration" eType="#//Duration"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="compare" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="isTime" eSuperTypes="#//TrueCondition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="expression" eType="#//MixExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//RuleExpression"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="symbol" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="duration" eType="#//Duration"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="logic" eSuperTypes="#//TrueCondition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="valueA" eType="#//MixExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="valueB" eType="#//MixExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="mathSymbol" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="isTrue" eSuperTypes="#//TrueCondition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="compare" eType="#//SingleExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="isDone" eSuperTypes="#//TrueCondition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="name" eType="#//RuleExpression"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="checkExpression" eSuperTypes="#//TrueCondition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="name" eType="#//Model"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MixExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="expression" eType="#//SingleExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="otherMixExpression" upperBound="-1"
+        eType="#//OtherMixExpression" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OtherMixExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="link" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="expression" eType="#//SingleExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SingleExpression"/>
+  <eClassifiers xsi:type="ecore:EClass" name="PeriodExpression" eSuperTypes="#//SingleExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GetPeriodExpression" eSuperTypes="#//SingleExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RuleTimeExpression" eSuperTypes="#//SingleExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//RuleExpression"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OtherExpression" eSuperTypes="#//SingleExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="StringExpression" eSuperTypes="#//SingleExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FloatExpression" eSuperTypes="#//SingleExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PersonExpression" eSuperTypes="#//SingleExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//initExpressions"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RegularExpression" eSuperTypes="#//SingleExpression"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ThingExpression" eSuperTypes="#//SingleExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="attribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SubjectExpress" eSuperTypes="#//ThingExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subject" eType="#//initExpressions"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ObjectExpress" eSuperTypes="#//ThingExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="object" eType="#//initExpressiono"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="trueOperation"/>
+  <eClassifiers xsi:type="ecore:EClass" name="messageExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="everymassage" upperBound="-1"
+        eType="#//everyMessage" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="everyMessage">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="symbol" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="message" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="transferExpression" eSuperTypes="#//trueOperation">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="person" eType="#//initExpressions"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//MixExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="changeExpression" eSuperTypes="#//trueOperation"/>
+  <eClassifiers xsi:type="ecore:EClass" name="changeString" eSuperTypes="#//changeExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="changeThing" eType="#//MixExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="changeResult" eType="#//MixExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="otherchange" eSuperTypes="#//changeExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="changeThing" eType="#//MixExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="changeResult" eType="#//MixExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="changeContract" eSuperTypes="#//changeExpression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="changeResult" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="changeRule" eSuperTypes="#//changeExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="changeThing" eType="#//RuleExpression"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="changeResult" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="changeOther" eSuperTypes="#//changeExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="changeThing" eType="#//SingleExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="changeResult" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="changeAddress" eSuperTypes="#//changeExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="changeThing" eType="#//MixExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="changeResult" eType="#//MixExpression"
+        containment="true"/>
+  </eClassifiers>
+</ecore:EPackage>
