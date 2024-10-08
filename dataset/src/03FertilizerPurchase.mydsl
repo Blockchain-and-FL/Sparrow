@@ -35,48 +35,48 @@ Contract FertilizerPurchase{
 	]
 	
 	Rule{
-		//买家告知交付时间，地点
+		// Buyer specifies delivery time and place
 		rule1:
 		setMessage(string place,uint giveTime)
 		Buyer;
 		
-		//卖家按照时间交货
+		// Seller delivers goods as per the specified time
 		rule2:
 		Con: isDone(rule1) and logic(now,giveTime,==),
 		Seller;
 		
-		//卖家延迟交货但不超过五天
+		// Seller delays delivery but within five days
 		rule2_2:
 		setMessage(uint dayNum)
 		Con: isTime(giveTime) and !isTime(giveTime+period) and !isDone(rule2),
-		Seller transfer(Buyer,dayNum*Proportion*o Service.price)
+		Seller transfer(Buyer,dayNum*Proportion*o Service.price);
 		
-		//卖家延迟交货超过五天，合约终止
+		// Seller delays delivery for more than five days, contract terminates
 		rule2_3:
 		Con: isTime(giveTime+period) and !isDone(rule2) and !isDone(rule2_2),
 		Buyer change(ContractState,terminate);
 		
-		//买家确认收货，质量不合格退货且合约终止
+		// Buyer confirms receipt, returns goods if quality is unqualified, and terminates contract
 		rule3:
 		setMessage(bool checkResult)
 		Con: isDone(rule2) and within 15 days after rule2,
 		Buyer
 		sub{
 			Con:!isTrue(checkResult),
-			change(ContractState,terminate)
+			change(ContractState,terminate);
 		};
 		
-		//质量合格，卖家报账
+		// Quality is satisfactory, Seller invoices Buyer
 		rule4:
 		Con: isDone(rule3),
 		Seller;
 		
-		//买家付款，合约结束
+		// Buyer makes payment, contract ends
 		rule5:
 		Con: isDone(rule4),
-		Buyer transfer(Seller,o Service.price) and end
+		Buyer transfer(Seller,o Service.price) and end;
 		
-		//仲裁机构仲裁过错方，过错方交罚金
+		// Arbitration institution arbitrates fault, faulting party pays fine
 		Addition[
 		arbitrationClause:
 		setMessage(string faultName,ufixed amount)
@@ -88,7 +88,7 @@ Contract FertilizerPurchase{
 		
 		seller_fault:
 		Con: isDone(arbitrationClause) and logic(faultName,s Seller.name,==),
-		Seller transfer(Buyer,amount) and end2
+		Seller transfer(Buyer,amount) and end2;
 		]
 		
 	}
