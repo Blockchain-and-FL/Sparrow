@@ -84,19 +84,19 @@ contract complexPurchase{
  when after Buyer did confirmGet
  while transfer $info1::Price to Seller::amount.
  
- //需要前面没做
+ //need not to do the last ones
  term no7: Platform can endSale32
  when after 15 day after Platform did confirmArrive
  while transfer $info1::Price to Seller::amount
  where thing::ownership = Buyer.
  
- //不可表达
+ //unable to express
  term no8: Seller can suspendDelivery1
  when within 5 day after info1::giveDate and after Buyer did confirmBuy
  //while transfer $info1::Price*lateIR*lateDays to Buyer::amount.
  while transfer $info1::Price*lateIR to Buyer::amount.
  
- //不可表达
+ //unable to express
  term no9: Seller can suspendDelivery2
  when after 5 day after info1::giveDate and after Buyer did confirmBuy
  while transfer $info1::Price*lateIR to Buyer::amount.
@@ -123,7 +123,7 @@ contract complexPurchase{
  term no16: Buyer can chooseSolutionB.
  term no17: Seller can chooseSolutionS.
  
-//无效
+//invalid
  term no18: Buyer can BuyerSetResult
  when solutionS='Negotiate' and solutionB='Negotiate'.
  
@@ -141,12 +141,12 @@ contract complexPurchase{
  or aa did aaSetResult) and faultName=Buyer::name
  while transfer $Compensation to Seller::amount.
  
- //无效
+ //invalid
  term no21: court can courtSetResult
  when solutionS='court' and solutionB='court'
  where faultName=name and Compensation=Compensation.
 
- //无效
+ //invalid
  term no23: aa can aaSetResult
  when solutionS='aa' and solutionB='aa'
  where faultName=name and Compensation=Compensation.
