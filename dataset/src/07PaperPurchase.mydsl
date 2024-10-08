@@ -1,92 +1,93 @@
-Contract PaperPurchase{
+Contract PaperPurchase {
 	PA Person
 	CA Ca
-	Token token{
-	  string name,
-	  string ID,	
-	  uint number,
-	  ufixed unit_price,
-	  uint price
+	Token token {
+	  string name,     // Product name (e.g., paper)
+	  string ID,       // Product ID (e.g., specific model/type of paper)
+	  uint number,     // Quantity of paper (in units, e.g., reams)
+	  ufixed unit_price, // Unit price per paper ream
+	  uint price       // Total price for all paper
 	}
 	init {
 		s Person Buyer = ('Shishou City Audit Office',
-			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')  // Buyer's details
 		s Person Seller = ('Hongxiang Technology, Taipingfang Avenue, Shishou City',
-			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')  // Seller's details
 		s Ca Arbitration = ('arbitration institution',
-			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
-		o token Service =('paper','VWN Qin Pin 70g',60,190,11400) 
-	}
-	ContractMessage{
-	  string place='No. 186, Taipingfang Avenue, Shishou City',
-	  date giveTime=2022/11/17,00:00,
-	  string faultName='',
-	  ufixed amount=0,
-	  bool checkResult=false,
-	  duration period=30 days,
-	  uint dayNum=0,
-	  ufixed Proportion=0.03
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')   // Arbitration institution
+		o token Service = ('paper', 'VWN Qin Pin 70g', 60, 190, 11400)  // Paper details
 	}
 	
-	Conditions[
-		delivery1: isDone(rule2) And within 1 days after rule2 ,
-		delivery2: isDone(rule2_2) And within 1 days after rule2_2
+	ContractMessage {
+	  string place = 'No. 186, Taipingfang Avenue, Shishou City', // Delivery location
+	  date giveTime = 2022/11/17, 00:00,  // Delivery time
+	  string faultName = '',               // Fault identifier in case of arbitration
+	  ufixed amount = 0,                   // Arbitration penalty amount
+	  bool checkResult = false,            // Inspection result
+	  duration period = 30 days,           // Maximum grace period for late delivery
+	  uint dayNum = 0,                     // Number of late days
+	  ufixed Proportion = 0.03             // Penalty proportion for late delivery
+	}
+	
+	Conditions [
+		delivery1: isDone(rule2) And within 1 day after rule2,     // Delivery condition 1: within 1 day of on-time delivery
+		delivery2: isDone(rule2_2) And within 1 day after rule2_2  // Delivery condition 2: within 1 day of late delivery
 	]
 	
-	Operations[
-		end:change(ContractState,finish),
-		end2: change(ContractState,terminate)
+	Operations [
+		end: change(ContractState, finish),     // Mark contract as completed
+		end2: change(ContractState, terminate)  // Mark contract as terminated
 	]
 	
-	Rule{		
-		//卖家按照时间交货
+	Rule {
+		// Rule 2: Seller must deliver the paper on time (i.e., on the specified giveTime)
 		rule2:
-		Con: logic(now,giveTime,==),
+		Con: logic(now, giveTime, ==),
 		Seller;
 		
-		//卖家延迟交货但不超过30天
+		// Rule 2_2: Seller delivers late but within the 30-day grace period
 		rule2_2:
 		setMessage(uint dayNum)
-		Con: isTime(giveTime) and !isTime(giveTime+period) and !isDone(rule2),
-		Seller transfer(Buyer,dayNum*Proportion*o Service.price)
+		Con: isTime(giveTime) and !isTime(giveTime + period) and !isDone(rule2),
+		Seller transfer(Buyer, dayNum * Proportion * o Service.price);
 		
-		//卖家延迟交货超过30天，合约终止
+		// Rule 2_3: Seller fails to deliver within the 30-day grace period, contract terminated
 		rule2_3:
-		Con: isTime(giveTime+period) and !isDone(rule2) and !isDone(rule2_2),
-		Buyer change(ContractState,terminate);
+		Con: isTime(giveTime + period) and !isDone(rule2) and !isDone(rule2_2),
+		Buyer change(ContractState, terminate);
 		
-		//买家确认收货，质量不合格退货且合约终止
+		// Rule 3: Buyer confirms delivery and inspects the paper; if quality is bad, contract is terminated
 		rule3:
 		setMessage(bool checkResult)
-		Con: delivery1 or delivery2 ,
-		Buyer transfer(Seller,o Service.price) and end
-		sub{
-			Con:!isTrue(checkResult),
-			change(ContractState,terminate)
+		Con: delivery1 or delivery2,
+		Buyer transfer(Seller, o Service.price) and end
+		sub {
+			Con: !isTrue(checkResult),
+			change(ContractState, terminate);
 		};
 		
-		//买家无理由退货且拒收货物
+		// Rule 4: Buyer returns the paper without specific reason and terminates the contract
 		rule4:
 		Con: delivery1 or delivery2 and !isDone(rule3),
-		Buyer transfer(Seller,o Service.price*Proportion) and change(ContractState,terminate)
+		Buyer transfer(Seller, o Service.price * Proportion) and change(ContractState, terminate);
 		
-		
-		//仲裁机构仲裁过错方，过错方交罚金
-		Addition[
+		// Arbitration clause for dispute resolution
+		Addition [
 		arbitrationClause:
-		setMessage(string faultName,ufixed amount)
+		setMessage(string faultName, ufixed amount)
 		Arbitration;
 		
+		// If Buyer is at fault, they pay compensation
 		buyer_fault:
-		Con: isDone(arbitrationClause) and logic(faultName,s Buyer.name,==),
-		Buyer transfer(Seller,amount) and end2;
+		Con: isDone(arbitrationClause) and logic(faultName, s Buyer.name, ==),
+		Buyer transfer(Seller, amount) and end2;
 		
+		// If Seller is at fault, they pay compensation
 		seller_fault:
-		Con: isDone(arbitrationClause) and logic(faultName,s Seller.name,==),
-		Seller transfer(Buyer,amount) and end2
+		Con: isDone(arbitrationClause) and logic(faultName, s Seller.name, ==),
+		Seller transfer(Buyer, amount) and end2;
 		]
-		
 	}
 	
-	require:isDone,isTime,isTrue,transfer;
+	require: isDone, isTime, isTrue, transfer;
 }
