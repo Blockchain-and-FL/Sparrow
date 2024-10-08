@@ -20,6 +20,85 @@ Contract ElectricVehiclePurchase{
 			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
 		s Ca Arbitration = ('arbitration institution',
 			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		o token Service = ('AH-Y14B', '14ElectricVehicle', 'white', 'regular', 72, 7.5, 1, 49800, 49800, 'Shipping fee not included') 
+	}
+	ContractMessage{
+	  string faultName = '',
+	  date signTime = 2015/09/01,00:00,
+	  string signPlace = 'ShenZhen',
+	  ufixed shippingFee = 0,
+	  ufixed default = 1000,
+	  bool checkResult = false,
+	  duration period = 10 days,
+	  duration warranty = 365 days,
+	  ufixed Proportion = 0.5
+	}
+	
+	Rule{
+		// Prepayment of 50% of the total cost
+		rule1:
+		Buyer transfer(Seller, o Service.sum * Proportion);
+		
+		// Delivery within 10 days and report the shipping fee
+		rule2:
+		setMessage(ufixed shippingFee)
+		Con: isDone(rule1) and !isTime(signTime + period),
+		Seller;
+		
+		// Acceptance and payment of the remaining amount, repeatable inspection
+		repeat
+		rule3:
+		setMessage(bool checkResult)
+		Con: isDone(rule2) and isTime(signTime + period),
+		Buyer 
+		sub{
+			Con: isTrue(checkResult),
+			transfer(Seller, o Service.sum * Proportion + shippingFee) and change(ContractState,finish);
+		};
+		
+		// Request for warranty, repeatable within the warranty period
+		repeat
+		rule4:
+		Con: isDone(rule3) and !isTime(signTime + warranty),
+		Buyer;
+		
+		// Late payment penalty by the seller, contract termination if delayed beyond twice the delivery period
+		rule5:
+		setMessage(new uint daynum)
+		Con: !isDone(rule3) and isTime(signTime + 2 * period),
+		Seller transfer(Buyer, default * daynum) and change(ContractState,terminate);
+		
+		// Late delivery penalty by the buyer, contract termination if delayed beyond twice the delivery period
+		rule6:
+		setMessage(new uint daynum)
+		Con: !isDone(rule2) and isTime(signTime + 2 * period),
+		Buyer transfer(Seller, default * daynum) and change(ContractState,terminate);
+	}
+	
+	require: isDone, isTime, isTrue, transfer;
+}
+Contract ElectricVehiclePurchase{
+	PA Person
+	CA Ca
+	Token token{
+		string model,
+		string name,
+		string color,
+		string seat,
+		uint Voltage,
+		ufixed power,
+		uint quantity,
+		uint price,
+		uint sum,
+		string Remark
+	}
+	init {
+		s Person Buyer = ('ChongQing Olympic Sports Center',
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		s Person Seller = ('ShenZhen AoHu Electric Vehicle Co., Ltd.',
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		s Ca Arbitration = ('arbitration institution',
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
 		o token Service =('AH-Y14B','14ElectricVehicle','white','regular',72,7.5,1,49800,49800,'Shipping fee not included') 
 	}
 	ContractMessage{
