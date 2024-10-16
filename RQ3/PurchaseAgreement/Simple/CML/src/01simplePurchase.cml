@@ -1,0 +1,73 @@
+namespace cml.examples
+
+import cml.generator.annotation.solidity.*
+
+@PullPayment
+contract SimplePurchase
+	Party seller
+	Party buyer
+	Party platform
+	Integer value
+	DateTime giveTime
+	Boolean finalResult
+	Duration lateDelivery
+	Duration confirmDay
+	Boolean endContract
+	
+	clause rule1
+		party buyer
+		may confirmPurchase
+		
+	//不是同一个意思了	
+	clause rule2
+		due before giveTime
+		//due within 1 days after buyer did confirmPurchase
+		party seller
+		may delivery
+		
+	clause rule3
+		due after seller did delivery 
+		party platform
+		may confirmArrive
+		
+	clause rule4
+		//due within confirmDay after platform did confirmArrive
+		party buyer
+		may confirmGet
+		
+	clause rule5
+		due after buyer did confirmGet
+		party platform
+		may transfer2s and changeContract
+
+	clause rule6 
+		//due after confirmDay after platform did confirmArrive
+		//due after clause rule4 failed
+		party platform
+		may transfer2s and changeContract
+			
+	action init(Party _seller,Party _buyer,Integer _value,Party _platform,
+	DateTime _giveTime,Duration _confirmDay)
+		seller=_seller
+		buyer=_buyer
+		platform=_platform
+		value=_value
+		giveTime=_giveTime
+
+	action checkResult(Boolean result)
+		finalResult=result	
+
+	action confirmPurchase()
+		transfer(platform,value)
+		
+	action delivery()
+		
+	action confirmArrive()
+	
+	action confirmGet()
+		
+	action transfer2s()
+		transfer(seller,value)
+		
+	action changeContract()
+		endContract=true

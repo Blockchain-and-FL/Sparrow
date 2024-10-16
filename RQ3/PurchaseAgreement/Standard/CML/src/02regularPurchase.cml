@@ -1,0 +1,130 @@
+namespace cml.examples
+
+import cml.generator.annotation.solidity.*
+
+@PullPayment
+contract RugularPurchase
+	Party seller
+	Party buyer
+	Party platform
+	Integer value
+	DateTime giveTime
+	Boolean finalResult
+	Duration lateDelivery
+	Duration confirmDay
+	Integer lateIR
+	Integer finishIR
+	String ownership
+	Boolean endContract
+	
+	clause rule1
+		given finalResult=true
+		party buyer
+		may confirmPurchase
+		
+	//不是同一个意思了	
+	clause rule2
+		due before giveTime
+		//due within 1 days after buyer did confirmPurchase
+		party seller
+		may delivery
+		
+	//表达不完全
+	clause rule3
+		due after seller did delivery 
+		//or after seller did late_delivery
+		party platform
+		may confirmArrive
+		
+	clause rule4
+		//due within confirmDay after platform did confirmArrive
+		party buyer
+		may confirmGet
+		
+	clause rule5
+		due after buyer did confirmGet
+		party platform
+		may transfer2s and changeContract
+	
+	clause rule6
+		//due after confirmDay after platform did confirmArrive
+		//due after clause rule4 failed
+		party platform
+		may transfer2s and confirmGet and changeContract
+		
+	clause rule7
+		//due within lateDelivery after clause rule2 failed
+		party seller
+		may late_delivery
+		
+	clause rule8
+		//due after clause rule7 failed
+		party seller
+		may payfinishB
+		
+	clause rule9
+		due after seller did payfinishB
+		party platform
+		may returnMoney and changeContract
+		
+	clause rule10
+		given endContract=false
+		party buyer
+		may payfinishS
+		
+	clause rule11
+		given endContract=false
+		party seller
+		may payfinishB
+		
+	//在10或者11后表达不了
+	clause rule12
+		due after buyer did payfinishS
+		party platform
+		may returnMoney and changeContract
+			
+	action init(Party _seller,Party _buyer,Party _platform,Integer _value,DateTime _giveTime,Boolean _finalResult,
+	Duration _lateDelivery,Duration _confirmDay,Integer _lateIR,Integer _finishIR,
+	String _ownership)
+		seller=_seller
+		buyer=_buyer
+		platform=_platform
+		value=_value
+		giveTime=_giveTime
+		finalResult=_finalResult
+		lateDelivery=_lateDelivery
+		confirmDay=_confirmDay
+		lateIR=_lateIR
+		finishIR=_finishIR
+		ownership=_ownership
+
+	action checkResult(Boolean result)
+		finalResult=result	
+
+	action confirmPurchase()
+		transfer(platform,value)
+		
+	action delivery()
+		
+	action confirmArrive()
+	
+	action confirmGet()
+		ownership='buyer'
+		
+	action transfer2s()
+		transfer(seller,value)
+		
+	action late_delivery(Integer lateDays)
+		transfer(buyer,value*lateIR*lateDays)
+		
+	action payfinishB()
+		transfer(buyer,value*finishIR)
+		
+	action payfinishS()
+		transfer(seller,value*finishIR)
+		
+	action returnMoney()
+		transfer(buyer,value)
+		
+	action changeContract()
+		endContract=true
