@@ -28,77 +28,77 @@ Contract LightRent{
 	}
 	
 	Rule{	
-		//支付定金
+		// Deposit payment
 		depositPay:
-		Con: !isTime(signTime+peroid),
+		Con: !isTime(signTime+period),
 		Buyer transfer(Seller,Proportion*o Service.price);
 		
-		//未及时支付定金
+		// Late deposit payment
 		depositPay_Late:
-		Con: isTime(signTime+peroid) and !isDone(depositPay),
-		Seller change(ContractState,terminate)
+		Con: isTime(signTime+period) and !isDone(depositPay),
+		Seller change(ContractState,terminate);
 		
-		//支付尾款
+		// Balance payment
 		balancePay:
 		Con: isDone(depositPay) and logic(now,startTime,==),
-		Buyer transfer(Seller,o Service.price-Proportion*o Service.price)
+		Buyer transfer(Seller,o Service.price-Proportion*o Service.price);
 		
-		//交货
+		// Delivery
 		delivery:
 		Con:isDone(balancePay),
 		Seller;
 		
-		//确认收货
+		// Confirm receipt
 		confirm:
 		Con:isDone(delivery),
 		Buyer;
 		
-		//不可抗原因交货失败
+		// Delivery failure due to force majeure
 		fail_delivery:
-		//交付延迟的天数
+		// Late days for delivery
 		setMessage(new uint lateDay)
 		Con: !isDone(confirm) and isTime(startTime),
-		Seller transfer(Buyer,lateDay*default)
+		Seller transfer(Buyer,lateDay*default);
 		
-		//延期表演
+		// Extended performance
 		extended:
 		setMessage(uint dayNum)
 		Con:isDone(confirm),
 		Buyer
 		sub{
 			Con:logic(dayNum,1,==),
-			transfer(Seller,extend1)
+			transfer(Seller,extend1);
 		}
 		sub{
 			Con:logic(dayNum,1,!=),
-			transfer(Seller,extend1+extend2*dayNum-extend3)
+			transfer(Seller,extend1+extend2*dayNum-extend3);
 		};
 		
-		//检查设备状态
+		// Check device status
 		checkDevice:
 		setMessage(bool checkStatus,ufixed deviceAmount)
 		Con: isTime(finishTime+dayNum),
 		Seller;
 		
-		//设备完好，合约终止
+		// Device is good, contract ends
 		status_good:
 		Con: isDone(checkDevice) and isTrue(checkStatus),
 		Buyer change(ContractState,finish);
 		
-		//设备有问题，赔钱，合约终止
+		// Device has issues, pay damages, contract ends
 		status_bad:
 		Con:isDone(checkDevice) and !isTrue(checkStatus),
 		Buyer transfer(Seller,deviceAmount) and change(ContractState,finish);
 		
-		//卖家提前终止
+		// Seller terminates early
 		terminate_Seller:
 		Con: !isTime(finishTime+dayNum),
 		Seller transfer(Buyer,defaultAmount) and change(ContractState,terminate);
 		
-		//买家提前终止
+		// Buyer terminates early
 		terminate_Buyer:
 		Con: !isTime(finishTime+dayNum),
-		Buyer transfer(Seller,defaultAmount) and change(ContractState,terminate)	
+		Buyer transfer(Seller,defaultAmount) and change(ContractState,terminate);	
 
 	}
 	

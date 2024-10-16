@@ -93,7 +93,7 @@ Once the project is running, you can start using the Sparrow IDE by:
 2. Writing your legal contract specifications in the DSL language.
 3. Using the provided tools to generate and test smart contracts.
 
-For more detailed information about Sparrow's syntactic semantic design and mapping rules, you can learn about it from the article "Sparrow: An Expressive, Encapsulated, and Extensible Domain-Specific Language for Smart Legal Contracts".
+For more detailed information about Sparrow's syntactic semantic design and mapping rules, you can learn about it from the article "Sparrow: An Expressive and Extensible Domain-Specific Language for Translating Legal Contracts to Smart Contracts".
 
 Enjoy developing with Sparrow!
 

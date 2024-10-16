@@ -1,41 +1,41 @@
-Contract DaliyPurchase{
+Contract DaliyPurchase {
 	PA Person
-	Token token{
-	  string name,
-	  string ID,	
-	  uint number,
-	  ufixed unit_price,
-	  uint price
+	Token token {
+	  string name,         // Product name (e.g., Daliy)
+	  string ID,           // Product ID
+	  uint number,         // Number of units
+	  ufixed unit_price,   // Price per unit
+	  uint price           // Total price for all units
 	}
 	init {
 		s Person Buyer = ('Wuhan Caidian District Justice Bureau',
-			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')  // Buyer's details
 		s Person Seller = ('Shengxing Hardware Store, Caidian District, Wuhan City',
-			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
-		o token Service =('Daliy','many',1,4801,4801) 
-	}
-	ContractMessage{
-	  string place='',
-	  date giveTime=0
+			a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')  // Seller's details
+		o token Service = ('Daliy', 'many', 1, 4801, 4801)  // Product details (Daliy purchase)
 	}
 	
-	Rule{
-		//买家告知交付时间，地点
+	ContractMessage {
+	  string place = '',          // Delivery location (to be specified by the buyer)
+	  date giveTime = 0           // Delivery time (to be specified by the buyer)
+	}
+	
+	Rule {
+		// Rule 1: Buyer provides delivery time and location
 		rule1:
-		setMessage(string place,uint giveTime)
+		setMessage(string place, uint giveTime)
 		Buyer;
-				
-		//卖家按照时间交货
+		
+		// Rule 2: Seller must deliver the goods at the specified time and location
 		rule2:
-		Con: logic(now,giveTime,==),
+		Con: logic(now, giveTime, ==),
 		Seller;
 		
-		//买家确认收货，合约终止
+		// Rule 3: Buyer confirms receipt of goods, and the contract is completed
 		rule3:
-		Con: isDone(rule2) ,
-		Buyer transfer(Seller,o Service.price) and change(ContractState,finish)
-		
+		Con: isDone(rule2),
+		Buyer transfer(Seller, o Service.price) and change(ContractState, finish);
 	}
 	
-	require:isDone,transfer;
+	require: isDone, transfer;
 }

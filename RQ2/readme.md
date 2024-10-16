@@ -16,12 +16,8 @@ We constructed an evaluation dataset comprising 10 general LC types, including v
 ### Development Effectiveness(Table V)
 - Sparrow generated SCs with a high degree of function integrity and security, without functional post-refinement.
 - The average function conversion rate was 2.18, indicating a strong correspondence between rules and functions.
-
-### Efficiency Evaluation
-![efficiency_eval](../picture/tableVII.png)
-- Sparrow produced SLCs with an average Line Conversion Rate (LCR) of 2.13 and a Byte Conversion Rate (BCR) of 2.78.
-- The average conversion efficiency was 258, reflecting the speed of the code generation process.
-- The average gas consumption for transaction and execution costs was 3,613,841 and 3,324,537, respectively, showcasing economic viability.
+  
+![effectiveness_eval](../picture/tableV.png)
 
 ### Security Analysis
 ![sec_eval](../picture/tableVI.png)

@@ -43,33 +43,33 @@ Contract CarRent{
 	]
 	
 	Rule{
-		//送货
+		// Delivery
 		delivery:
 		Con:isTime(startTime) and before finishTime,
 		Seller;
 		
-		//确认收货并检查
+		// Confirm receipt and inspection
 		checkThing:
 		setMessage(new bool checkResult)
 		Con: isDone(delivery),
 		Buyer;
 		
-		//检查结果为好，10天内付钱，合约结束
+		// Inspection is good, pay within 10 days, contract ends
 		check_good:
 		Con: totalCheck or isDone(postpone_Buyer),
 		Buyer transfer(Seller,o Service.price) and end;
 		
-		//检查结果不好，7天内发起退货
+		// Inspection is bad, initiate return within 7 days
 		check_false:
 		Con: isDone(checkThing)and !isTrue(checkResult) and time2,
 		Buyer;
 		
-		//买家退货，卖家可重新发货
+		// Buyer returns goods, seller can resend
 		return:
 		Con: isDone(check_false) and within 3 days after check_false,
 		Buyer change(delivery,false) and change(check_good,false);
 		
-		//卖家发货推迟
+		// Seller's delivery is delayed
 		postpone_Seller:
 		setMessage(uint dayNum)
 		Con: isTime(finishTime) and !isDone(delivery),
@@ -83,7 +83,7 @@ Contract CarRent{
 			change(price,price-price*dayNum*default11)
 		};
 		
-		//买家付款推迟
+		// Buyer's payment is delayed
 		postpone_Buyer:
 		setMessage(uint dayNum)
 		Con: trueCheck and !time1 and !isDone(check_good),
@@ -97,15 +97,15 @@ Contract CarRent{
 			change(price,price+price*dayNum*default11)
 		};
 		
-		//卖家终止
+		// Seller terminates
 		terminate_Seller:
 		Seller transfer(Buyer,default2*price) and end2;
 		
-		//买家终止
+		// Buyer terminates
 		terminate_Buyer:
 		Buyer transfer(Seller,default2*price) and end2
 		
-		//仲裁机构仲裁过错方，过错方交罚金
+		// Arbitration agency arbitrates the party at fault, party at fault pays penalty
 		Addition[
 		arbitrationClause:
 		setMessage(string faultName,ufixed amount)
