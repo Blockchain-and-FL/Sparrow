@@ -1,0 +1,64 @@
+Contract simpleRent{
+	PA Person
+	Token token{
+		string name,
+		uint price,
+		uint day
+	}
+	init {
+		s Person lessor = ('A',a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		s Person lessee = ('B',a'0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2')
+		o token House =('thing',100,30) 
+	}
+	ContractMessage{
+		date startTime=2000/10/05,12:00,
+	 	date finishTime=2000/11/05,12:00,
+	 	date payTime=2000/10/05,12:00,
+	 	duration period=10 days,
+	 	uint rent=1000,
+	 	uint despoit=500,
+	 	uint continueRent=200,
+	 	bool continue=false,
+	 	uint continueDays=0
+	}
+	
+	Rule{
+		rule1:
+		Con: !isTime(startTime),
+		lessee transfer(lessor,rent+despoit);
+		
+		repeat 
+		rule2:
+		Con: isDone(rule1) and isTime(payTime+period) 
+		and !isTime(payTime+period+1days)
+		and !isTime(finishTime),
+		lessee transfer(lessor,rent) and change(payTime,payTime+period);
+		
+		repeat
+		rule3:
+		setMessage(uint continueDays)
+		Con: !isTime(finishTime),
+		lessee transfer(lessor,rent*continueDays);
+		
+		repeat
+		rule4:
+		setMessage(bool continue)
+		Con:isDone(rule3),
+		lessor
+		sub{
+			Con: isTrue(continue),
+			change(finishTime,finishTime+continueDays days)
+		}
+		sub{
+			Con: !isTrue(continue),
+			transfer(lessee,rent*continueDays)
+		};
+		
+		rule5:
+		Con:isTime(finishTime),
+		lessor transfer(lessee,deposit) and  change(ContractState,finish)
+		
+	}
+	
+	
+}
