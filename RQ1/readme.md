@@ -22,13 +22,12 @@ Development effectiveness is measured by executing the deployed SCs to assess th
 
 
 ### Security Analysis
-While not the primary focus of this evaluation, we validate the security of the generated SCs using tools like Mythril, SmartCheck, and Slither. The results are summarized in Table 2, highlighting potential vulnerabilities such as reentrancy and timestamp dependency. Mitigation strategies include employing reentrancy guards and refining the timestamp handling.
+While not the primary focus of this evaluation, we validate the security of the generated SCs using tools like Mythril, SmartCheck, and Slither. The results highlight potential vulnerabilities such as reentrancy and timestamp dependency. Mitigation strategies include employing reentrancy guards and refining the timestamp handling.
 ![sec_eval](../picture/tableVI.png)
 
 ## Conclusion
 Sparrow demonstrates strong modeling and development effectiveness in automating the generation of smart contracts from legal contracts. Although certain security considerations remain, the approach allows for efficient and automated contract deployment without requiring manual refinement.
 
-For further details, please refer to the specific sections in the documentation and accompanying tables.
 
 
 
