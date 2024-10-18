@@ -1,7 +1,6 @@
 
 # Modeling and Development Effectiveness Evaluation
-
-We assess Sparrow's effectiveness by examining both its modeling capabilities and the efficiency of the smart contracts it generates.
+We evaluate the effectiveness of our Sparrow in terms of modeling effectiveness and development effectiveness.
 
 ## 1. Modeling Effectiveness
 Modeling effectiveness evaluates how well Sparrow captures the semantics and syntax of legal elements within LCs. We specifically check:
@@ -24,6 +23,7 @@ Development effectiveness is measured by executing the deployed SCs to assess th
 
 ### Security Analysis
 While not the primary focus of this evaluation, we validate the security of the generated SCs using tools like Mythril, SmartCheck, and Slither. The results are summarized in Table 2, highlighting potential vulnerabilities such as reentrancy and timestamp dependency. Mitigation strategies include employing reentrancy guards and refining the timestamp handling.
+![sec_eval](../picture/tableVI.png)
 
 ## Conclusion
 Sparrow demonstrates strong modeling and development effectiveness in automating the generation of smart contracts from legal contracts. Although certain security considerations remain, the approach allows for efficient and automated contract deployment without requiring manual refinement.
