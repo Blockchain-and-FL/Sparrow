@@ -3,7 +3,7 @@
 
 ## Overview
 
-This repository showcases a case study demonstrating how to translate a Residential Lease Agreement (RLA) into a Smart Contract (SC) using our Sparrow framework. The case study includes a detailed description of the RLA, its Specification Language Contract (SLC) representation, and the automatically generated Solidity smart contract, complete with deployment tests.
+This repository showcases a case study demonstrating how to translate a Residential Lease Agreement (RLA) into a Smart Contract (SC) using our Sparrow framework. The case study includes a detailed description of the RLA, its Smart Legal Contract (SLC) representation, and the automatically generated Solidity SC, complete with deployment tests.
 
 ## Table of Contents
 
@@ -58,7 +58,5 @@ The parameters for the RLA case study are outlined in the below table, which inc
 The tests confirm the correct execution of the contract logic. Below are some results:
 ![test_result](../picture/test_result.png)
 
-Gas consumption analysis shows trends in transaction costs, indicating the efficiency of operations.
-
 ## Conclusion
-This case study successfully demonstrates the translation of a Residential Lease Agreement into a Smart Contract using the Sparrow framework, highlighting the advantages of automated contract generation. The generated SC operates seamlessly on Ethereum, adhering to the intended contractual logic.
+This case study successfully demonstrates the translation of a RLA into a SC using the Sparrow framework, highlighting the advantages of automated contract generation. The generated SC operates seamlessly on Ethereum, adhering to the intended contractual logic.
