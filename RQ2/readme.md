@@ -1,7 +1,7 @@
 # RQ2: Efficiency of Sparrow
 The efficiency of Sparrow is evaluated based on four primary criteria: **line conversion rate**, **byte conversion rate**, **conversion efficiency**, and **gas consumption**. 
 
-![sec_eval](../picture/tableVI.png)
+![eff_eval](../picture/tableVII.png)
 
 ## Efficiency Evaluation Criteria
 
