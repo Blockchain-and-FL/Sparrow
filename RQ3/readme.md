@@ -1,6 +1,4 @@
 # RQ3: Extensibility of Sparrow
-This repository presents the extensibility evaluation of Sparrow, showcasing its adaptability in modeling diverse LCs compared to selected baselines, such as CML and TA-SPESC. This evaluation is crucial for demonstrating Sparrow's capability to handle the dynamic growth of contract types and numbers effectively.
-
 We assess the extensibility of Sparrow by comparing it with CML and TA-SPESC based on their functions and performance. Our analysis includes three types of LCs: **purchase contracts**, **auction contracts**, and **rent contracts**, categorized into three complexity levels: **simple**, **regular**, and **complex**. The complexity levels vary, with the regular level introducing property rights and fundamental breach of contract clauses, while the complex level adds diverse functional roles and intricate resolution clauses.
 
 ## Function Comparison
