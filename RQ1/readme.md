@@ -1,5 +1,5 @@
 
-# RQ1: Modeling and Development Effectiveness Evaluation
+# RQ1: Effectiveness Evaluation
 We evaluate the effectiveness of our Sparrow in terms of modeling effectiveness and development effectiveness.
 
 ## 1. Modeling Effectiveness
