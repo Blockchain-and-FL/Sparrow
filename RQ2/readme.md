@@ -1,33 +1,27 @@
-# Modeling and Development Effectiveness Evaluation
+# RQ2: Efficiency of Sparrow
+The efficiency of Sparrow is evaluated based on four primary criteria: **line conversion rate**, **byte conversion rate**, **conversion efficiency**, and **gas consumption**. 
 
-## Experimental Objective
-The primary objective of our experiments was to assess the modeling and development effectiveness of Sparrow.
-
-## Methodology
-We constructed an evaluation dataset comprising 10 general LC types, including various lease and purchase contracts. The contracts were implemented in Sparrow and the generated SCs were evaluated for functionality and security.
-
-
-## Key Findings
-
-### Modeling Effectiveness(Table V)
-- Sparrow successfully demonstrated the ability to express all defined legal elements and logical structures within the LCs.
-- The framework showed high completeness in terms of legal element expression and logical expressiveness.
-
-### Development Effectiveness(Table V)
-- Sparrow generated SCs with a high degree of function integrity and security, without functional post-refinement.
-- The average function conversion rate was 2.18, indicating a strong correspondence between rules and functions.
-  
-![effectiveness_eval](../picture/tableV.png)
-
-### Security Analysis
 ![sec_eval](../picture/tableVI.png)
-- Using tools like Mythril, Smartcheck, and Slither, we identified vulnerabilities such as reentrancy and timestamp dependency in the generated SCs.
-  
-   **Reentrancy**: Identified due to publicly visible functions that could be transferred before assignments are completed.
-  
-   **Timestamp Dependency**: Caused by the direct use of blockchain timestamps, which can be manipulated in certain conditions.
-  
-- Sparrow's design allows for fixed revision patterns and integration of an independent clock provided by an internal system or a time oracle to address these security concerns, ensuring the generated smart contracts can be made more secure with refinement.
+
+## Efficiency Evaluation Criteria
+
+1. **Line Conversion Rate (LCR)**: This is calculated as the ratio of Effective Lines of Code (ELOC) to Effective Lines of Specification (ELOS). A higher LCR indicates that more code can be derived from fewer lines of specification.
+
+2. **Byte Conversion Rate (BCR)**: This ratio is derived from Effective Bytes of Code (EBOC) to Effective Bytes of Specification (EBOS). The BCR is often more reliable than the LCR as it provides a more precise measure of redundancy in the code.
+
+3. **Conversion Efficiency**: This metric measures the number of bytes converted per unit of time, highlighting the overall efficiency of the development process.
+
+4. **Gas Consumption**: Gas costs associated with transactions and execution are output by Remix IDE, reflecting the resources required for deploying and executing smart contracts on the Ethereum blockchain.
+
+### Key Findings
+From our evaluation, we observe the following:
+
+- The degree of redundancy in the SLC specification can be quantified by EBOS and ELOS, while redundancy in the SC can be measured by ELOC and EBOC.
+- Simpler LCs tend to produce less complex SLC specifications and SCs, leading to higher conversion rates.
+- The average generation time for SCs is **27.5 ms**, and the average conversion efficiency is **258 bytes per millisecond**, indicating that Sparrow is feasible for practical use.
+- Gas consumption is quantified with an average transaction cost of **3,613,841** and an average execution cost of **3,324,537**. This consumption is influenced by ELOC and EBOC, with higher values leading to increased gas costs for the same function.
+
 
 ## Conclusion
-Sparrow demonstrates the enhanced capability in expressiveness and a high level of development effectiveness, producing SCs that are largely free from the need for functional post-refinement. However, identified security vulnerabilities highlight the need for careful consideration in the design and implementation phases to ensure the generated SCs are secure.
+The evaluation results indicate that Sparrow demonstrates efficient performance in converting legal contracts into smart contracts, making it a practical tool for automating this process. The metrics highlight not only the efficiency of code generation but also the associated costs in terms of gas consumption, which is critical for real-world deployment on the Ethereum network.
+
