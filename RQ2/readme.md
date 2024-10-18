@@ -17,11 +17,10 @@ The efficiency of Sparrow is evaluated based on four primary criteria: **line co
 From our evaluation, we observe the following:
 
 - The degree of redundancy in the SLC specification can be quantified by EBOS and ELOS, while redundancy in the SC can be measured by ELOC and EBOC.
-- Simpler LCs tend to produce less complex SLC specifications and SCs, leading to higher conversion rates.
 - The average generation time for SCs is **27.5 ms**, and the average conversion efficiency is **258 bytes per millisecond**, indicating that Sparrow is feasible for practical use.
 - Gas consumption is quantified with an average transaction cost of **3,613,841** and an average execution cost of **3,324,537**. This consumption is influenced by ELOC and EBOC, with higher values leading to increased gas costs for the same function.
 
 
 ## Conclusion
-The evaluation results indicate that Sparrow demonstrates efficient performance in converting legal contracts into smart contracts, making it a practical tool for automating this process. The metrics highlight not only the efficiency of code generation but also the associated costs in terms of gas consumption, which is critical for real-world deployment on the Ethereum network.
+The evaluation results indicate that Sparrow demonstrates efficient performance in converting LCs into SCs, making it a practical tool for automating this process. 
 
