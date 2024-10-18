@@ -20,7 +20,8 @@ The RLA utilized in this case study is based on the version referenced in [SPESC
 - **Default Terms**: Conditions triggered by delays, including late house delivery and rent payments.
 - **Termination Terms**: Circumstances under which the lease may be terminated, such as significant delays or property damage.
 - **Additional Terms**: Regulatory oversight and arbitration processes independent of external events.
-
+  
+![contract](../picture/contract.png)
 
 ## Specification of RLA
 
@@ -30,10 +31,6 @@ The SLC specification simplifies the modeling process by encapsulating redundant
 - **Objects**: Comprising `deposit`, `rent`, and other financial details.
 - **Conditions**: Such as `isDone` and `isTime`.
 - **Operations**: Triggered by `transfer` or `assign`.
-
-
-
-
 
 ## Generated Smart Contract
 
@@ -53,12 +50,6 @@ The parameters for the RLA case study are outlined in the accompanying tables, w
 ![test_parameters](../picture/test_parameters.png)
 
 ### Test Scenarios
-Initial Payment: The tenant pays the first rent and deposit.
-House Delivery: The landlord delivers the house.
-Regular Rent Payments: The tenant makes regular rent payments.
-Late Payments and Penalties: Late payments trigger penalties and contract pauses.
-Contract Expiration: The contract expires, and actions to reclaim the deposit are executed.
-
 
 On 11/08, the tenant initiates the first rent and deposit payment.
 On 11/10, the landlord delivers the house.
