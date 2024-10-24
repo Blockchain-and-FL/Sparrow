@@ -40,7 +40,7 @@ contract ordinaryRent
 	}
 	token public thing = token("thing", 100, 30, "A", "A");
 	constructor() {
-	// 初始化群组
+	// Initialize the group
 	}
 	event completedRule(address indexed person, string rulename);
 	function giveUse() internal{
@@ -163,13 +163,13 @@ contract ordinaryRent
         _;
     }
 	event ContractStateChange(string newState);
-	// 自定义 modifier：根据字符串参数值允许或禁止执行
+	// Custom modifier: Allow or prohibit execution based on string parameter value
 	modifier onlyState(string memory State) {
 	    require(compareStrings(State, "start") || compareStrings(State, "restart"), "Not allowed in this state");
 	     emit ContractStateChange(State);
 	    _;
 	}
-	// 辅助函数，比较两个字符串是否相等
+	// Helper function to compare if two strings are equal
 	function compareStrings(string memory a, string memory b) internal pure returns (bool) {
 	    return (keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b)));
 	}

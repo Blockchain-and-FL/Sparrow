@@ -55,7 +55,7 @@ contract ElectricVehiclePurchase
 	}
 	token public Service = token("AH-Y14B", "14ElectricVehicle", "white", "regular", 72, 7.5, 1, 49800, 49800, "Shipping fee not included");
 	constructor() {
-	// 初始化群组
+	// Initialize the group
 	}
 	event completedRule(address indexed person, string rulename);
 	function rule1() public payable onlyState(ContractState) onlyBuyer unDone("rule1"){
@@ -111,20 +111,20 @@ contract ElectricVehiclePurchase
 			emit completedRule(msg.sender,"rule6");
 		}
 	}
-	// 检查某个功能是否已经执行
+	// Check if a specific function has been executed
 	function isDone(string memory functionName) internal view returns (bool) {
 	    return functionStatus[functionName];
 	}
-	// 用于判断是否达到指定时间的函数
+	// Function to determine if the specified time has been reached
 	function isTime(uint256 targetTime) internal view returns (bool) {
 	    return block.timestamp >= targetTime;
 	}
-	// 带参数的函数，用于检查值是否为 true
+	Function to check if the value is true.
 	function isTrue(bool valueToCheck) internal pure returns (bool) {
 	    return valueToCheck == true;
 	}
 	event Transfer(address indexed from, address indexed to, uint256 amount);
-	// 用于给指定地址转账
+	// Transfer to a specified address
 	function transferTo(address payable recipient, uint amount) internal {
 	    require(recipient != address(0), "Invalid recipient address");
 	    require(amount > 0, "Amount must be greater than zero");
@@ -136,13 +136,13 @@ contract ElectricVehiclePurchase
         _;
     }
 	event ContractStateChange(string newState);
-	// 自定义 modifier：根据字符串参数值允许或禁止执行
+	// Custom modifier: Allow or prohibit execution based on string parameter value
 	modifier onlyState(string memory State) {
 	    require(compareStrings(State, "start") || compareStrings(State, "restart"), "Not allowed in this state");
 	     emit ContractStateChange(State);
 	    _;
 	}
-	// 辅助函数，比较两个字符串是否相等
+	// Helper function to compare if two strings are equal
 	function compareStrings(string memory a, string memory b) internal pure returns (bool) {
 	    return (keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b)));
 	}

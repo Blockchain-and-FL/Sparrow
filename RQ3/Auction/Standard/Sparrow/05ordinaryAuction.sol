@@ -38,7 +38,7 @@ contract ordinaryAuction
 	}
 	token public thing = token("thing", 1, "A");
 	constructor() {
-	// 初始化群组
+	// Initialize the group
 	}
 	event completedRule(address indexed person, string rulename);
 	function rule1() public payable onlyState(ContractState) onlyAuctioneer unDone("rule1"){
@@ -104,23 +104,23 @@ contract ordinaryAuction
 			emit completedRule(msg.sender,"rule8");
 		}
 	}
-	// 检查某个功能是否已经执行
+	// Check if a specific function has been executed
 	function isDone(string memory functionName) internal view returns (bool) {
 	    return functionStatus[functionName];
 	}
-	// 用于判断是否达到指定时间的函数
+	// Function to determine if the specified time has been reached
 	function isTime(uint256 targetTime) internal view returns (bool) {
 	    return block.timestamp >= targetTime;
 	}
 	event Transfer(address indexed from, address indexed to, uint amount);
-	// 用于给指定地址转账
+	// Transfer to a specified address
 	function transferTo(address payable recipient, uint amount) internal {
 	    require(recipient != address(0), "Invalid recipient address");
 	    require(amount > 0, "Amount must be greater than zero");
 	    recipient.transfer(amount);
 	    emit Transfer(msg.sender,recipient, amount);
 	}
-	// 辅助函数，根据比较符号执行比较
+	// Helper function to perform comparison based on the comparison operator
 	    function compare(uint a, uint b, string memory op) internal pure returns (bool) {
 	        if (compareStrings(op, ">")) {
 	            return a > b;
@@ -139,12 +139,12 @@ contract ordinaryAuction
 	    }
 	
 	
-	    // 只有当满足条件 valueA > valueB 时，才能执行 setValue 函数
+	    // The setValue function can only be executed if the condition valueA > valueB is met
 	    function logic(uint256 valueA, uint256 valueB, string memory symbol) internal pure returns (bool) {
 	        return compare(valueA, valueB, symbol);
 	    }
 	function compareTimestamps(uint256 timestamp1, uint256 timestamp2, uint256 customSeconds, string memory operator) internal returns (bool) {
-	       // 计算两个时间戳的差值（取绝对值，确保差值为正数）
+	       // Calculate the difference between two timestamps (take the absolute value to ensure the difference is positive)
 	       uint256 timeDifference = timestamp1 - timestamp2;
 	       if (keccak256(bytes(operator)) == keccak256(bytes(">"))) {
 	           return timeDifference > customSeconds;
@@ -163,13 +163,13 @@ contract ordinaryAuction
         _;
     }
 	event ContractStateChange(string newState);
-	// 自定义 modifier：根据字符串参数值允许或禁止执行
+	// Custom modifier: Allow or prohibit execution based on string parameter value
 	modifier onlyState(string memory State) {
 	    require(compareStrings(State, "start") || compareStrings(State, "restart"), "Not allowed in this state");
 	     emit ContractStateChange(State);
 	    _;
 	}
-	// 辅助函数，比较两个字符串是否相等
+	// Helper function to compare if two strings are equal
 	function compareStrings(string memory a, string memory b) internal pure returns (bool) {
 	    return (keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b)));
 	}
