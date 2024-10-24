@@ -18,7 +18,7 @@ contract SimplePurchase
 		party buyer
 		may confirmPurchase
 		
-	//不是同一个意思了	
+	//not the same meaning	
 	clause rule2
 		due before giveTime
 		//due within 1 days after buyer did confirmPurchase
