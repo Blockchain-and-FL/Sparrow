@@ -41,7 +41,7 @@ contract simplePurchase{
  when after Buyer did confirmGet
  while transfer $info1::Price to Seller::amount.
  
- //表达错误
+ // Express wrong
  term no6: Platform can endSale32
  when after 15 day after Platform did confirmArrive
  while transfer $info1::Price to Seller::amount.
