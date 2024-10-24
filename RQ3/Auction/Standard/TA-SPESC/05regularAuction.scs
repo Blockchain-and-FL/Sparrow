@@ -45,13 +45,13 @@ contract regularAuction{
 	when this bidder is highestBidder and within 12 hour after BiddingStopTime
 	while transfer $highestPrice to platform::amount.
 	
-	//5和6一起
+	// Terms 6 and 7 together
 	term no5: platform can transferRight
 	when after bidders did payBid
 	while transfer $highestPrice to auctioneer::amount
 	where thing::ownership=highestBidder.
 	
-	//表达不了
+	// Unable to express
 	term no7: bidders can payDefault
 	//when bidders did not payBid and 
 	when after 12 hour after BiddingStopTime and this bidder is highestBidder
