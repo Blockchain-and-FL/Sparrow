@@ -39,7 +39,7 @@ contract ComplexRent
 		party lessee
 		may payOne
 		
-	//不完全
+	// express not fully
 	//due after lessee did payOne
 	clause rule3
 		due before startTime
@@ -53,7 +53,7 @@ contract ComplexRent
 		party lessor
 		may deliveryLate
 	
-	//不完全
+	// express not fully
 	clause rule5
 		due after startTime.addDuration(payLate)
 		given !end
@@ -88,7 +88,7 @@ contract ComplexRent
 		party lessor
 		may setContinue
 		
-	//表达不了行为
+	// cannot express action
 	clause rule10_1
 		due after lessor did setContinue
 		given !end and continueResult
@@ -123,7 +123,7 @@ contract ComplexRent
 		party lessee
 		may getAA
 		
-	//表达不了或
+	// cannot express 'or'
 	clause rule16
 		due after lessor did getAA
 		party aa
