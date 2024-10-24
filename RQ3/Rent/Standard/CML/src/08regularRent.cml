@@ -27,7 +27,7 @@ contract RegularRent
 		party lessee
 		may payOne
 		
-	//不完全
+	// express not fully
 	//due after lessee did payOne
 	clause rule2
 		due before startTime
@@ -41,7 +41,7 @@ contract RegularRent
 		party lessor
 		may deliveryLate
 	
-	//不完全
+	// express not fully
 	clause rule4
 		due after startTime.addDuration(payLate)
 		given !end
@@ -76,7 +76,7 @@ contract RegularRent
 		party lessor
 		may setContinue
 		
-	//表达不了行为
+	// unable to express action
 	clause rule9_1
 		due after lessor did setContinue
 		given !end and continueResult
