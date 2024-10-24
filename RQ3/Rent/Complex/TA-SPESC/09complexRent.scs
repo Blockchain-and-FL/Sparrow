@@ -59,13 +59,13 @@ contract complexRent{
  	when after Lessee did payFirst and before info1::startDate
  	where thing::useRight=Lessee.
  	
- 	//表达不完全
+ 	// express not fully
  	term no4: Lessor can changeLate
  	when within 5 day after info1::startDate
  	while transfer $info1::rent*faultIR to Lessee
  	where lateDays=LateDay.
  	
- 	//表达不完全,3,4未完成
+ 	// express not fully, Term 3 or Term 4 not fulfill
  	term no5: Lessor can finishLate
  	when after 5 day after info1::startDate
  	while transfer $info1::rent*faultIR to Lessee
@@ -76,7 +76,7 @@ contract complexRent{
  	while transfer $info1::rent to Lessor
  	where info1::payDate=now.
  	
- 	//表达不完全
+ 	// express not fully
 	term no7: Lessee can payRegularLate
  	when within 5 day after info1::payDate+info1::payDuration
  	//while transfer $info1::rent*lateDays*faultIR to Lessor
@@ -87,13 +87,13 @@ contract complexRent{
  	when after 5 day after info1::payDate+info1::payDuration
  	where thing::useRight=Lessor.
  	
- 	//顺序不对
+ 	// wrong sequence
  	term no9: Lessee can continue
  	when before info1::finishDate
  	while transfer $info1::continueRent*continueDays to Lessor
  	where continueDays=days.
  	
- 	//顺序不对
+ 	// wrong sequence
  	term no10_1: Lessor can confirmContinue
  	when after Lessee did continue and continue=true
  	where continue=result and info1::finishDate=info1::finishDate+continueDays.
@@ -108,7 +108,7 @@ contract complexRent{
  	while transfer $info1::depositMoney to Lessee::amount
  	where thing::useRight=Lessor.
  	
- 	//无效
+ 	// Invalid
 	term no12: ra can pauseContract.
 	term no13: ra can restartContract.
 	
