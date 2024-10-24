@@ -54,13 +54,13 @@ contract regularPurchase{
  while transfer $info1::Price to Seller::amount
  where thing::ownership = Buyer.
  
- //不可表达
+ // Unable to express 
  term no7: Seller can suspendDelivery1
  when within 5 day after info1::giveDate and after Buyer did confirmBuy
  //while transfer $info1::Price*lateIR*lateDays to Buyer::amount.
  while transfer $info1::Price*lateIR to Buyer::amount.
  
- //不可表达
+ // Unable to express 
  term no8: Seller can suspendDelivery2
  when after 5 day after info1::giveDate and after Buyer did confirmBuy
  while transfer $info1::Price*lateIR to Buyer::amount.
