@@ -36,13 +36,13 @@ contract regularRent{
  	when after Lessee did payFirst and before info1::startDate
  	where thing::useRight=Lessee.
  	
- 	//表达不完全
+ 	// express not fully
  	term no3: Lessor can changeLate
  	when within 5 day after info1::startDate
  	while transfer $info1::rent*faultIR to Lessee
  	where lateDays=LateDay.
  	
- 	//表达不完全,2,3未完成
+ 	// express not fully, Term 2 or Term 3 are not fulfilled
  	term no4: Lessor can finishLate
  	when after 5 day after info1::startDate
  	while transfer $info1::rent*faultIR to Lessee
@@ -53,7 +53,7 @@ contract regularRent{
  	while transfer $info1::rent to Lessor
  	where info1::payDate=now.
  	
- 	//表达不完全
+ 	// express not fully
  	term no6: Lessee can payRegularLate
  	when within 5 day after info1::payDate+info1::payDuration
  	//while transfer $info1::rent*lateDays*faultIR to Lessor
@@ -64,13 +64,13 @@ contract regularRent{
  	when after 5 day after info1::payDate+info1::payDuration
  	where thing::useRight=Lessor.
  	
- 	//顺序不对
+ 	// wrong sequence
  	term no8: Lessee can continue
  	when before info1::finishDate
  	while transfer $info1::continueRent*continueDays to Lessor
  	where continueDays=days.
  	
- 	//顺序不对
+ 	// wrong sequence
  	term no9_1: Lessor can confirmContinue
  	when after Lessee did continue and continue=true
  	where continue=result and info1::finishDate=info1::finishDate+continueDays.
