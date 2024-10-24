@@ -22,14 +22,14 @@ contract RugularPurchase
 		party buyer
 		may confirmPurchase
 		
-	//不是同一个意思了	
+	// not the same meaning	
 	clause rule2
 		due before giveTime
 		//due within 1 days after buyer did confirmPurchase
 		party seller
 		may delivery
 		
-	//表达不完全
+	// express not fully
 	clause rule3
 		due after seller did delivery 
 		//or after seller did late_delivery
@@ -77,7 +77,7 @@ contract RugularPurchase
 		party seller
 		may payfinishB
 		
-	//在10或者11后表达不了
+	// Cannot express after Term 10 or Term 11
 	clause rule12
 		due after buyer did payfinishS
 		party platform
