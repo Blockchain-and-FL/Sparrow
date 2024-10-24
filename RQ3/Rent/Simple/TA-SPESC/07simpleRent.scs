@@ -29,13 +29,13 @@ contract simpleRent{
  	while transfer $info1::rent to Lessor
  	where info1::payDate=now.
  
- 	//顺序不对
+ 	// wrong sequence
  	term no3: Lessee can continue
  	when before info1::finishDate
  	while transfer $info1::continueRent*continueDays to Lessor
  	where continueDays=days.
  	
- 	//顺序不对
+ 	// wrong sequence
  	term no4_1: Lessor can confirmContinue
  	when after Lessee did continue and continue=true
  	where continue=result and info1::finishDate=info1::finishDate+continueDays.
