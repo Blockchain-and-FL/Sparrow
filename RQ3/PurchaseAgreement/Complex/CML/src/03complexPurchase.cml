@@ -35,14 +35,14 @@ contract ComplexPurchase
 		party buyer
 		may confirmPurchase
 		
-	//不是同一个意思了	
+	//not the same meaning	
 	clause rule3
 		due before giveTime
 		//due within 1 days after buyer did confirmPurchase
 		party seller
 		may delivery
 		
-	//表达不完全
+	//express not fully
 	clause rule4
 		due after seller did delivery 
 		//or after seller did late_delivery
@@ -89,7 +89,7 @@ contract ComplexPurchase
 		party seller
 		may payfinishB
 		
-	//在11或者12后表达不了
+	// After Term 11 or Term 12 it cannot be expressed
 	clause rule13
 		due after buyer did payfinishS
 		party platform
