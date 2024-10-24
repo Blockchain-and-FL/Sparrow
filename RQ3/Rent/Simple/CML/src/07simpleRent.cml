@@ -39,7 +39,7 @@ contract SimpleRent
 		party lessor
 		may setContinue
 		
-	//表达不了行为
+	// unable to express action
 	clause rule4_1
 		due after lessor did setContinue
 		given !end and continueResult
