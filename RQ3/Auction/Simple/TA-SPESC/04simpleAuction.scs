@@ -41,7 +41,7 @@ contract simpleAuction{
 	when this bidder is highestBidder and within 12 hour after BiddingStopTime
 	while transfer $highestPrice to platform::amount.
 	
-	//6和7一起
+	// Terms 6 and 7 together
 	term no5: platform can transferRight
 	when after bidders did payBid
 	while transfer $highestPrice to auctioneer::amount.
