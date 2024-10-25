@@ -1658,7 +1658,7 @@ class SparrowGenerator extends AbstractGenerator {
 			return "!isTime("+timepoint.value.name+")"
 	}
 	
-	//时间转换方法
+	// Time conversion function
 	def  boolean isLeapYear(int year){
         if (year % 4 != 0) {
             return false;
