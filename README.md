@@ -40,18 +40,6 @@ Sparrow's ontology design follows the principles of:
 - **Polymorphism**: Leveraging polymorphism, Sparrow enables the same interface to support multiple underlying forms, allowing for more flexible and reusable contract elements.
 
 By focusing on functional set construction rather than redundant processing, Sparrow's ontology is designed to be more reusable, manageable, and extensible.
-
-
-## Getting Started
-
-To get started with Sparrow, follow these steps:
-
-1. **Installation**: Ensure you have the latest version of Eclipse IDE with Xtext plugin installed.
-2. **Project Setup**: Import the Sparrow project into your workspace.
-3. **Model Design**: Use the Model Design Module to translate your legal contracts into formal specifications.
-4. **Code Generation**: Leverage the SLC Development Module to generate your smart contracts.
-5. **Evaluation**: Utilize the SLC Evaluation Module to test and evaluate your SLCs.
-
    
 ## Setup and Usage Guide
 To get started with the Sparrow Framework in Eclipse, follow these step-by-step instructions:
