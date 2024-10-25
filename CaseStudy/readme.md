@@ -29,7 +29,7 @@ The SLC specification simplifies the modeling process by encapsulating redundant
 
 ## Generated Smart Contract
 
-The SLC specification is automatically translated into Solidity, adhering to predefined rules without the need for manual refinement. The generated smart contract of RLA is at `HouseRent.sol`.
+The SLC specification is automatically translated into Solidity, adhering to predefined rules without the need for manual refinement. The generated SC of RLA is at `HouseRent.sol`.
 
 
 ## Deployment Test
