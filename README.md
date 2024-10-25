@@ -1,10 +1,10 @@
 # Sparrow
 ## Introduction
-Sparrow is an innovative framework designed to translate legal contracts into secure and efficient smart contracts on the Ethereum blockchain. Our system streamlines the process of Smart Legal Contract (SLC) design and development, ensuring enhanced expressiveness, concise code generation, and extensibility.
+Sparrow is an innovative framework designed to translate legal contracts (LCs) into efficient and complete smart contracts on the Ethereum blockchain. Our system streamlines the process of Smart Legal Contract (SLC) design and development, ensuring enhanced expressiveness, concise code generation, and extensibility.
 
 ## Key Features
 
-- **Model Design Module**: Utilizes an ontology metamodel and logical process structure to formalize the semantics and syntax of legal contracts, minimizing ambiguity in natural language.
+- **Model Design Module**: Utilizes an ontology model and logical process structure to formalize the semantics and syntax of legal contracts, minimizing ambiguity in natural language.
 - **SLC Development Module**: Automates the generation of SLCs, mapping specifications to Solidity code with precision, ensuring code integrity and efficiency.
 - **SLC Evaluation Module**: Conducts comprehensive testing and evaluation, comparing Sparrow's performance with existing solutions like CML and TA-SPESC.
   
@@ -12,21 +12,18 @@ Sparrow is an innovative framework designed to translate legal contracts into se
 
 ## System Objectives
 
-Sparrow is developed with clear objectives to address specific challenges in the field of smart contract generation:
+Sparrow is developed with clear objectives to address specific challenges in translating LCs into SCs:
 
-1. **Enhanced Contract Expression**: Sparrow enhances the expression of legal contracts, ensuring broad compatibility and accurate functional requirement representation.
-2. **Concise Code Generation**: Focused on generating concise codes to optimize gas consumption on the Ethereum network.
-3. **Extensibility**: Designed to automate and scale the performance of LC generation, with modular and reusable code for seamless functional integration.
-
-
-Sparrow leverages the power of the Eclipse Modeling Framework (EMF) to construct a domain-specific ontology that underpins the generation of Smart Legal Contracts (SLCs). Our approach emphasizes clarity, reusability, and extensibility in the ontology design.
+1. **Effective Modeling and Development**: Sparrow should achieve effective semantic modeling of LCs to generate SLCs and automate the translation of those SLCs into SCs without requiring post-manual processing.
+2. **Concise Code Generation**: Sparrow should generate concise codes to minimize gas consumption for deploying on the Ethereum blockchain. 
+3. **Extensibility**: Sparrow should be capable of extensibility to satisfy new functional requirements and handle a large number of LCs.
 
 ## Core Ontology Components
 
 Sparrow's ontology is structured around the following components:
 
-- **Subject**: Represents involved entities in a contract, including parties and other stakeholders such as authenticators, regulators, and arbitrators.
-- **Object**: Targets the entities owned or triggered by the Subject, such as assets, messages, and status.
+- **Subject**: An enhanced set used to denote the functional roles involved in contract management, not only the primary contracting parties but also extend to other overlooked stakeholders such as authenticators, regulators, and arbitrators.
+- **Object**: Targets the entities owned or triggered by the Subject, whether tangible or intangible, such as assets, messages, and status.
 - **Conditions**: A unified set of logic structures that control the performance and validity of contracts, without distinguishing between preconditions and postconditions.
 - **Operations**: Actions emitted by defined roles in the Subject, describing corresponding rights and obligations within the contract.
 - **Rules**: A composite set of terms covering essential elements like payment terms, delivery schedules, rights and obligations, dispute resolution, warranties, and other pertinent aspects of legal contracts.
@@ -39,10 +36,10 @@ Sparrow's ontology design follows the principles of:
 
 - **Decoupling**: Separating functional sets to enhance modularity and reusability.
 - **Aggregation**: Grouping related components to form coherent contract structures.
-- **Encapsulation**: Sparrow encapsulates the internal logic of contract components to protect them from external interference and misuse.
-- **Polymorphism**: Leveraging polymorphism, Sparrow enables a single interface to support multiple underlying forms, allowing for more flexible and reusable contract elements.
+- **Encapsulation**: Sparrow encapsulates the internal logic of contract components for reuse and concise expression.
+- **Polymorphism**: Leveraging polymorphism, Sparrow enables the same interface to support multiple underlying forms, allowing for more flexible and reusable contract elements.
 
-By focusing on functional set construction rather than redundant processing, Sparrow's ontology is designed to be more reusable, concise, and extensible.
+By focusing on functional set construction rather than redundant processing, Sparrow's ontology is designed to be more reusable, manageable, and extensible.
 
 
 ## Getting Started
