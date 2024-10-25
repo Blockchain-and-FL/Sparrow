@@ -25,15 +25,15 @@ The RLA utilized in this case study is based on the version referenced in [SPESC
 
 ## Specification of RLA
 
-The SLC specification simplifies the modeling process by encapsulating redundant expressions of similar contractual clauses. The translated SLC of RLA is at HouseRent.sparrow.
+The SLC specification simplifies the modeling process by encapsulating redundant expressions of similar contractual clauses. The translated SLC of RLA is at `HouseRent.sparrow`.
 
 ## Generated Smart Contract
 
-The SLC specification is automatically translated into Solidity, adhering to predefined rules without the need for manual refinement. The generated smart contract of RLA is at HouseRent.sol.
+The SLC specification is automatically translated into Solidity, adhering to predefined rules without the need for manual refinement. The generated smart contract of RLA is at `HouseRent.sol`.
 
 
 ## Deployment Test
-We conducted deployment tests to validate the generated SC against the original LC. Using Remix IDE, the SC was compiled and deployed on Ethereum. The flowchart illustrates the business process of the RLA.
+We conducted deployment tests to validate the generated SC against the original LC. Using Remix IDE, the SC was compiled and deployed on Ethereum. The flowchart illustrates the business process of the RLA.`
 ![process](../picture/process.png)
 
 ### Test Parameters
