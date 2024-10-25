@@ -43,7 +43,7 @@ As shown in Table X, we observe that as contract complexity increases, both ELOS
 - **TA-SPESC**: Average of 4.39 lines and 17.62 AST nodes in SC.
 - **Sparrow**: Average of 2.61 lines and 11.41 AST nodes in SC.
 
-Our results demonstrate that Sparrow generates SCs more concisely than its counterparts, leading to reduced gas consumption and ensuring its extensibility to manage the growing number of contracts within budget constraints.
+Our results demonstrate that Sparrow generates SCs more concisely than its counterparts, leading to reduced gas consumption and ensuring its extensibility to manage the growing number of contracts within a limited budget.
 
 ## Conclusion
 The extensibility evaluation confirms that Sparrow outperforms CML and TA-SPESC in both functional and performance metrics. Its design allows it to effectively adapt to diverse LCs and accommodate the dynamic growth of contract numbers, making it a robust tool for automating smart contract generation.
