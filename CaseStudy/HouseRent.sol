@@ -153,16 +153,16 @@ contract HouseRent
 			ContractState="terminate";
 			changeRule("rule15");
 	}
-	// 检查某个功能是否已经执行
+	// Check if a specific function has been executed
 	function isDone(string memory functionName) internal view returns (bool) {
 	    return functionStatus[functionName];
 	}
-	// 用于判断是否达到指定时间的函数
+	// Function to determine if the specified time has been reached
 	function isTime(uint256 targetTime) internal view returns (bool) {
 	    return block.timestamp >= targetTime;
 	}
 	event Transfer(address indexed from, address indexed to, uint amount);
-	// 用于给指定地址转账
+	// Transfer to a specified address
 	function transferTo(address payable recipient, uint amount) internal {
 	    require(recipient != address(0), "Invalid recipient address");
 	    require(amount > 0, "Amount must be greater than zero");
@@ -174,18 +174,18 @@ contract HouseRent
         _;
     }
 	event ContractStateChange(string newState);
-	// 自定义 modifier：根据字符串参数值允许或禁止执行
+	// Custom modifier: Allow or prohibit execution based on string parameter value
 	modifier onlyState(string memory State) {
 	    require(compareStrings(State, "start") || compareStrings(State, "restart"), "Not allowed in this state");
 	     emit ContractStateChange(State);
 	    _;
 	}
-	// 辅助函数，比较两个字符串是否相等
+	// Helper function to compare if two strings are equal
 	function compareStrings(string memory a, string memory b) internal pure returns (bool) {
 	    return (keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b)));
 	}
 	
-	//每个条款固定调用函数，条款执行后更改条款状态，记录事件和时间
+	// Each clause calls a fixed function, changes the clause state after execution, and records events and time
 	function changeRule(string memory ruleName) internal {
 		functionStatus[ruleName] = true;
 		functionFinishTime[ruleName]=block.timestamp;
