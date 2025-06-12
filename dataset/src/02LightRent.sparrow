@@ -1,0 +1,103 @@
+Contract LightRent{
+	PA Person
+	Token token{
+	  string name,	
+	  uint price
+	}
+	Init {
+		Person Buyer = ('LuoTian County HuangMei Drama Group', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		Person Seller = ('GuangYing Electronic Products Sales Department, BaoHe District, HeTei City', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4'),
+		token Service =('Performance services',64807) 
+	}
+	ContractMessage{
+	  ufixed extend1=10000,
+	  ufixed extend2=20000,
+	  ufixed default=7710,
+	  ufixed Proportion=0.4,
+	  uint dayNum=0,
+	  date signTime=2021/12/15,00:00,
+	  duration period=2 days,
+	  string signPlace='HuangGang City, HuBei Province, HeFei',
+	  date startTime=2021/12/20,00:00,
+	  date finishTime=2021/12/22,00:00,
+	  bool checkStatus=false,
+	  ufixed deviceAmount=0,
+	  ufixed defaultAmount=10000
+	}
+	
+	Rules{	
+		//Pay deposit
+		depositPay:
+		If: !isTime(signTime+peroid),
+		Buyer transfer(Seller,Proportion*o Service.price);
+		
+		//Late deposit payment
+		depositPay_Late:
+		If: isTime(signTime+peroid) and !isDone(depositPay),
+		Seller assign(ContractState,terminate)
+		
+		//Pay remaining balance
+		balancePay:
+		If: isDone(depositPay) and logic(now,startTime,==),
+		Buyer transfer(Seller,o Service.price-Proportion*o Service.price)
+		
+		//Delivery
+		delivery:
+		If:isDone(balancePay),
+		Seller;
+		
+		//Confirm receipt
+		confirm:
+		If:isDone(delivery),
+		Buyer;
+		
+		//Delivery failed due to force majeure
+		fail_delivery:
+		//Days of delivery delay
+		SetMessage(new uint lateDay)
+		If: !isDone(confirm) and isTime(startTime),
+		Seller transfer(Buyer,lateDay*default)
+		
+		//Performance postponed
+		extended:
+		SetMessage(uint dayNum)
+		If: isDone(confirm),
+		Buyer
+		SubRule{
+			If:logic(dayNum,1,==),
+			transfer(Seller,extend1)
+		}
+		SubRule{
+			If:logic(dayNum,1,!=),
+			transfer(Seller,extend1+extend2*dayNum-extend3)
+		};
+		
+		//Check equipment status
+		checkDevice:
+		SetMessage(bool checkStatus,ufixed deviceAmount)
+		If: isTime(finishTime+dayNum),
+		Seller;
+		
+		//Equipment OK, contract ends
+		status_good:
+		If: isDone(checkDevice) and isTrue(checkStatus),
+		Buyer assign(ContractState,finish);
+		
+		//Equipment faulty, compensation, contract ends
+		status_bad:
+		If:isDone(checkDevice) and !isTrue(checkStatus),
+		Buyer transfer(Seller,deviceAmount) and assign(ContractState,finish);
+		
+		//Seller terminates early
+		terminate_Seller:
+		If: !isTime(finishTime+dayNum),
+		Seller transfer(Buyer,defaultAmount) and assign(ContractState,terminate);
+		
+		//Buyer terminates early
+		terminate_Buyer:
+		If: !isTime(finishTime+dayNum),
+		Buyer transfer(Seller,defaultAmount) and assign(ContractState,terminate)	
+	}
+	
+	Require:isDone,isTime,isTrue,transfer;
+}
