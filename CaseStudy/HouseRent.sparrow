@@ -1,54 +1,122 @@
-Contract HouseRent{
-	PA Person
-	AA aa 
-	RA ra
-	Token House{string location, string useRight, string ownRight}
-	Init{
-		Person Landlord = ('LandlordA',a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
-		Person Tenant = ('TenantB',a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB')
-		aa aa = ('aa',a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB')
-		ra ra = ('ra',a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB'),
-		House house=('thing',1,'A') 
-	}
-	ContractMessage{
-		uint deposit=6000,
-		uint rent=6000,
-		duration pd=30 days,
-		duration mddt=7 days, 
-		duration mpdt=30 days
-	}
-	Conditions[completeDelivery: isDone(rule3) or isDone(rule4)]
-	Operations[payRegular: transfer(Landlord, rent) and assign(payTime, payTime+pd)]
+Contract HouseRent {
+    PA Person
+    AA aa 
+    RA ra
 
-	Rules{
-	rule1: If: !isTime(startTime), Tenant transfer(Landlord, deposit+rent);
-	rule2: If: isTime(startTime) and !isDone(rule1), Landlord assign(ContractState, terminate);
-	rule3: If: !isTime(startTime) and isDone(rule1), Landlord assign(o house.useRight,s Tenant.name);
-	rule4: If: isTime(startTime) and !isDone(rule3) and !isTime(startTime+time1),
-    Landlord assign(o house.useRight,s Tenant.name) and transfer(Tenant, rent);
-	rule5: If: !isDone(rule3) and isTime(startTime+mddt),
-    Landlord transfer(Tenant, deposit+rent) and assign(ContractState, terminate);
-    Repeat rule6: If: completeDelivery and isTime(payTime+mpdt) and !isTime(payTime+mpdt+1 days), Tenant payRegular;
-	rule7: If: completeDelivery and !isDone(rule6) and isTime(payTime+pd+1 days) and !isTime(payTime+pd+mpdt),
-    Tenant transfer(Landlord, 2*rent) and assign(payTime, payTime+pd);
-	rule8: If: completeDelivery and !isDone(rule6) and !isDone(rule7) and isTime(payTime+pd+mpdt),
-    Landlord assign(ContractState,terminate);
-    rule9: SetMessage(new bool checkresult)
-    If: isTime(finishTime), Landlord assign(ContractState, terminate) and assignString(o house.useRight,s Landlord.name) 
-    SubRule{If: isTrue(checkresult), transfer(Tenant, deposit) and assign(ContractState, finish)
+    Token House {
+        string location,
+        string useRight,
+        string ownRight
     }
-	Additional[
-	rule10: 
-	SetMessage(string aaresult)
-	aa;
-	rule11: If: isDone(rule10) and compareString(aaresult, s Landlord.name),
-    Landlord transfer(Tenant, penalty) and assign(ContractState, terminate);
-	rule12: If: isDone(rule10) and compareString(aaresult, s Tenant.name),
-    Tenant transfer(Landlord, penalty) and assign(ContractState, terminate);
-	rule13: ra assign(ContractState, pause);
-    rule14: ra assign(ContractState, restart);
-    rule15: ra assign(ContractState, terminate)
+
+    Init {
+        Person Landlord = ('LandlordA', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+        Person Tenant = ('TenantB', a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB')
+        aa aa = ('aa', a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB')
+        ra ra = ('ra', a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB'),
+        House house = ('thing', 1, 'A') 
+    }
+
+    ContractMessage {
+        uint deposit = 6000,
+        uint rent = 6000,
+        duration payDuration = 30 days,
+        duration maxDeliveryDelayTime = 7 days,
+        duration maxPaymentDelayTime = 30 days,
+        date payTime = 2023/11/10, 12:00,
+        date startTime = 2023/11/10, 12:00 // Contract start time
+    }
+
+    Conditions [
+        completeDelivery: isDone(useRightDelivery) or isDone(lateDeliveryPenalty)
     ]
-	}
-	Require: isDone, isTime, compareString,transfer;
+
+    Operations [
+        payRegular: transfer(Landlord, rent) and assign(payTime, payTime + payDuration)
+    ]
+
+    Rules {
+
+        // Before the contract starts, Tenant pays deposit + one-month rent
+        depositPay:
+        If: !isTime(startTime),
+        Tenant transfer(Landlord, deposit + rent);
+
+        // If not paid by start time, contract terminated by landlord
+        lateDepositEnd:
+        If: isTime(startTime) and !isDone(depositPay),
+        Landlord assign(ContractState, terminate);
+
+        // If deposit and rent paid on time, landlord delivers useRight
+        useRightDelivery:
+        If: !isTime(startTime) and isDone(depositPay),
+        Landlord assign(o house.useRight, s Tenant.name);
+
+        // If delayed delivery within 7 days, landlord delivers and compensates 1 rent
+        lateDeliveryPenalty:
+        If: isTime(startTime) and !isDone(useRightDelivery) and !isTime(startTime + maxDeliveryDelayTime),
+        Landlord assign(o house.useRight, s Tenant.name) and transfer(Tenant, rent);
+
+        // If not delivered within maxDeliveryDelayTime, landlord refunds and terminates
+        overdueDeliveryEnd:
+        If: !isDone(useRightDelivery) and isTime(startTime + maxDeliveryDelayTime),
+        Landlord transfer(Tenant, deposit + rent) and assign(ContractState, terminate);
+
+        // Monthly rent payment by tenant
+        Repeat payRent:
+        If: completeDelivery,
+        SubRule {
+            If: isTime(payTime + maxPaymentDelayTime) and !isTime(payTime + maxPaymentDelayTime + 1 days),
+            Tenant payRegular
+        }
+        SubRule {
+            If: isTime(payTime + payDuration + 1 days) and !isTime(payTime + payDuration + maxPaymentDelayTime),
+            Tenant transfer(Landlord, 2 * rent) and assign(payTime, payTime + payDuration)
+        }
+
+        // Penalty: late rent (within grace period), pay double rent
+        lateRentPayPenalty:
+        If: completeDelivery and !isDone(payRent) and isTime(payTime + payDuration + 1 days)
+            and !isTime(payTime + payDuration + maxPaymentDelayTime),
+        Tenant transfer(Landlord, 2 * rent) and assign(payTime, payTime + payDuration);
+
+        // Overdue: not paid within grace period, contract terminated
+        overdueRentPayEnd:
+        If: completeDelivery and !isDone(payRent) and !isDone(lateRentPayPenalty)
+            and isTime(payTime + payDuration + maxPaymentDelayTime),
+        Landlord assign(ContractState, terminate);
+
+        // After contract expires, landlord checks house, returns deposit, terminates
+        houseCheck:
+        SetMessage(new bool checkresult)
+        If: isTime(finishTime),
+        Landlord assign(ContractState, terminate) and assignString(o house.useRight, s Landlord.name)
+        SubRule {
+            If: isTrue(checkresult),
+            transfer(Tenant, deposit) and assign(ContractState, finish)
+        }
+
+        Additional [
+
+            // Arbitration result processing
+            arbitrateResult:
+            SetMessage(string aaresult)
+            aa;
+
+            landlordCompensate:
+            If: isDone(arbitrateResult) and compareString(aaresult, s Landlord.name),
+            Landlord transfer(Tenant, penalty) and assign(ContractState, terminate);
+
+            tenantCompensate:
+            If: isDone(arbitrateResult) and compareString(aaresult, s Tenant.name),
+            Tenant transfer(Landlord, penalty) and assign(ContractState, terminate);
+
+            // Regulatory intervention
+            regulatoryPause:    ra assign(ContractState, pause);
+            regulatoryRestart:  ra assign(ContractState, restart);
+            regulatoryTerminate: ra assign(ContractState, terminate)
+        ]
+    }
+
+    Require: isDone, isTime, logic, compareString, transfer;
 }
