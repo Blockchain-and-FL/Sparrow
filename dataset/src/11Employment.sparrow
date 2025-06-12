@@ -1,0 +1,98 @@
+Contract employment2{
+	PA Person
+	Token Products{string name, string ownership}
+	Token Job{string name, string location, string content}
+	Init{
+		Person company = ('companyA',a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		Person employee = ('employee',a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB')
+		Person insuranceCompany = ('insuranceCompanyC',a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB'),
+     	Products products=('products','companyA')
+     	Job job=('software engineer','Zhong Guancun','maintain code base.')
+	}
+	ContractMessage{
+		uint salary=6000,	 // base monthly salary
+		ufixed bonusPercentage=0.15,	// annual bonus rate
+		duration pd=30 days,	 // monthly payment interval
+		duration probationPd=180 days,	// 6 months probation period
+		ufixed disacountPercentage=0.8,	 // salary rate during probation
+		ufixed insurancePercentage=0.12,
+		date startTime=2023/07/10,00:00,
+		date firstPayTime=2023/07/31,00:00,
+		date firstAnnualTime=2023/12/31,00:0,
+		date finishTime=2026/07/31,00:00,	// 3-year contract, subject to renewal
+		duration hospitality=5 days,	// annual sick days
+		duration leftdays= 5 days,		// remaining sick days
+		uint workage=0,					 // years of service
+		uint overworkhours=0,
+		uint overworkfee=50
+	}
+	Conditions[
+		payCon: isTime(firstPayTime) and !isTime(firstPayTime+1 days),
+		annualCon: isTime(firstAnnualTime) and !isTime(firstAnnualTime+ 1 days)
+	]
+	Operations[
+		payRegular: transfer(employee, salary+overworkhours*overworkfee) and assign(firstPayTime, firstPayTime+pd),
+		renewYear: 	assign(firstAnnualTime,firstAnnualTime+1 years)
+	]
+
+	Rules{
+		Repeat paySalary: 
+		SetMessage(new uint overworkhours) 
+		If: payCon,
+		SubRule{
+			If: isTime(startTime+probationPd),	
+			company payRegular
+		}
+		SubRule{
+			If: !isTime(startTime+probationPd),company transfer(employee, salary*disacountPercentage+overworkhours*overworkfee)
+		}
+		
+		Repeat payBonus:
+		SetMessage(new uint bonusWhole)
+		If: annualCon,
+		company transfer(employee,bonusPercentage*bonusWhole) and renewYear 
+
+		// the hospitality increase to 10 days when work age achieves 5 years.
+		Repeat sickDaysPerYear:
+		SetMessage(new uint expectdayoff)
+		If: logic(expectdayoff,leftdays,<=),
+		employee assign(leftdays,leftdays-expectdayoff)
+		SubRule{
+			If: isTime(firstAnnualTime+365 days),
+	    	assign(workage,workage+1) and renewYear and assign(leftdays,hospitality)
+		}
+		SubRule{
+	    	If: logic(workage,4,>=),assign(hospitality,10)
+	    }
+	
+		// Company pays insurance for employee
+		Repeat payInsuranceA:
+		If: payCon,
+		company transfer(insuranceCompany,insurancePercentage*salary) and assign(firstPayTime, firstPayTime+pd)
+		
+		// Employee pays personal portion of insurance
+		Repeat payInsuranceB:
+		If: payCon,
+		employee transfer(insuranceCompany,insurancePercentage*salary) and assign(firstPayTime, firstPayTime+pd)
+		
+		// Contract renewal check at expiration
+		renewContract:
+		SetMessage(new bool renew)
+		If: isTime(finishTime),
+		SubRule{
+			If: !isTrue(renew),company assign(ContractState,terminate)
+		}
+		SubRule{
+			If: isTrue(renew),
+			company assign(finishTime,finishTime+5 years)	 // extend for 5 years
+		}
+			
+		// Transfer product ownership to company upon resignation	
+		productOwn:
+		SetMessage(new string productList)
+		If: isDone(renewContract) and isTime(finishTime),
+		employee assign(o products.name,productList) and assign(o products.ownership,s company.name)	
+		
+  }
+	Require: isDone, isTrue, isTime, logic, compareString,transfer, timeSub;
+}

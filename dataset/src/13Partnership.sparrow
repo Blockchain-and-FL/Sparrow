@@ -1,0 +1,131 @@
+Contract partnership{
+	PA Person
+	Token contribution {string name, uint value, string ownRight}
+	Init{
+		Person partner1 = ('partnerA',a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		Person partner2 = ('partnerB',a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB')
+		Person manager = ('manager',a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB'),
+     	contribution equipmentByA=('equipment',100000,'partnerA')
+     	contribution timeEffortByB=('timeEffort',50000,'partnerB')
+	}
+	ContractMessage{
+		duration pd= 90 days,	// payment interval: 90 days
+		uint PLRatioForA=60,	// profit/loss share ratio for partner A
+		uint PLRatioForB=40,	// profit/loss share ratio for partner B
+		date startTime=2025/01/01,00:00,
+		date finishTime=2026/12/31,00:00, // 2-year contract
+		date payTime=2025/01/31,00:00,	  // first payment date
+		bool withdraw1=false,
+		bool withdraw2=false, 
+		bool contri1=false,
+		bool contri2=false,
+		uint loss=0,
+		string newName="",
+		address newAccount=a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB'
+	}
+	Conditions[
+		payCon: isTime(payTime) and !isTime(payTime+1 days),
+		lossShareCon: isDone(lossSet) and logic(loss,0,>) and payCon,
+		withdrawCon: isDone(checkResult) and !isTime(finishTime -3 months)	 // withdrawal allowed only before last 3 months
+	]
+	
+	Operations[
+		payOp: assign(payTime, payTime+pd)	// advance next payment time
+	]
+	
+	Rules{
+	// Partner A makes initial contribution
+	contribute1:	
+	If: !isTime(startTime),
+	partner1 change(CM contri1, true)
+	
+	// Partner B makes initial contribution
+	contribute2:	
+	If: !isTime(startTime),
+	partner2 change(CM contri2, true)
+
+	// Check contribution result; terminate if failed
+	checkResult:
+	If: isDone(contribute1) and isDone(contribute2) and isTime(startTime) and !isTime(startTime+1 days),
+	SubRule{
+		If: !isTrue(contri1) or !isTrue(contri2),
+		assign(ContractState, terminate)	
+	}
+	
+	
+	// Share profit from manager account
+	Repeat profitShared:
+	SetMessage(new uint profit)
+	If: logic(profit,0,>) and payCon,
+	manager transfer(partner1,profit*PLRatioForA*0.01) and transfer(partner2,profit*PLRatioForB*0.01) 
+	and payOp
+	
+	// Manager sets loss
+	Repeat lossSet:
+	SetMessage(uint loss) 
+	manager;
+	
+	// Partner A pays share of loss
+	Repeat lossSharedA:
+	If: lossShareCon,
+	partner1 transfer(manager,loss*PLRatioForA*0.01) 
+	
+	// Partner B pays share of loss
+	Repeat lossSharedB:
+	If: lossShareCon,
+	partner2 transfer(manager,loss*PLRatioForB*0.01) 
+	
+	// Reset loss after both pay
+	Repeat resetLoss:
+	If: isDone(lossSharedA) and isDone(lossSharedB),
+	assign(loss,0) and payOp and assign(lossSharedA, false) and assign(lossSharedB, false) 
+	
+
+	// Withdrawal notice by Partner A
+	withdrawNoticeByA: 
+	If: withdrawCon,
+	partner1 change(CM withdraw1, true)
+	
+	// Withdrawal notice by Partner B
+	withdrawNoticeByB: 
+	If: withdrawCon,
+	partner2 change(CM withdraw2, true)
+	
+	
+	Exclusive[
+		// Partner A withdraws, Partner B gets 100% of shares
+		withdrawA:
+		SetMessage(new uint property)
+		If: isDone(withdrawNoticeByA) and isTrue(withdraw1),
+		manager transfer(partner1,property) and assign(PLRatioForB,100);
+		
+		// Partner B withdraws, Partner A gets 100% of shares
+		withdrawB:
+		SetMessage(new uint property)
+		If: isDone(withdrawNoticeByB) and isTrue(withdraw2),
+		manager transfer(partner2,property) and assign(PLRatioForA,100)
+	]
+	
+	// Add new partner replacing one who withdrew
+	joinNew:
+	SetMessage(string newName, address newAccount)
+	SubRule{
+		If: isDone(withdrawA) and !isDone(withdrawB),
+		manager assign(s partner1.name, newName) 
+		and assign(s partner1.account, a newAccount)
+	}
+	SubRule{
+		If: isDone(withdrawB) and !isDone(withdrawA),
+		manager assign(s partner2.name, newName) 
+		and assign(s partner2.account, a newAccount)
+	}
+	
+	// Redistribute share percentages
+	redistriPercen:
+	SetMessage(new uint percentA, new uint percentB)
+	If: isDone(joinNew) and logic(percentA+percentB,100,==),
+	manager assign(PLRatioForA,percentA) and assign(PLRatioForB,percentB)	
+	
+    }
+	Require: isDone, isTime, isTrue, logic, compareString,transfer,timeSub;
+}

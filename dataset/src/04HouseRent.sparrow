@@ -1,0 +1,57 @@
+Contract HouseRent{
+	PA Person
+	Token House{
+	  string location,
+	  string usage
+	}
+	Init {
+		Person Landlord = ('Fengshan Town Vegetable Village Joint Stock Economic Cooperative', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		Person Tenant = ('Luotian County Statistics Bureau', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4'),
+		House house = ('Lijiawan','office')
+	}
+	ContractMessage{ 
+	  uint penalty=3000,
+	  uint management_fee=4000,
+	  duration payduration=365 days,
+	  date startTime=2020/10/16,00:00,
+	  date finishTime=2023/10/15,00:00,
+	  date payTime=2020/10/16,00:00,
+	  uint time1=90 days,
+	  uint time2=15 days,
+	  bool continue=false,
+	  uint amount=0
+	}
+	
+	Rules{
+		//Pay first year’s management fee
+		rule1: If: !isTime(startTime), Tenant transfer(Landlord, management_fee);
+		
+		//Pay management fee for subsequent years
+		Repeat
+		rule2: If: isDone(rule1) and !isTime(payTime + payduration), Tenant transfer(Landlord, management_fee) and assign(payTime, now);
+		
+		//Whether to renew upon expiration, renew for one year
+		rule3: SetMessage(bool continue) If: !isTime(finishTime), Tenant
+		SubRule{
+			If: isTrue(continue), transfer(Landlord, management_fee) and assign(finishTime, finishTime + payduration)
+		};
+		
+		//Within 15 days after expiration, landlord inspects and sets compensation
+		rule4: SetMessage(uint amount) If: isTime(finishTime) and !isTime(finishTime + time2), Landlord;
+		
+		//Tenant returns the house, contract ends
+		rule5: If: isDone(rule4), Tenant transfer(Landlord, amount) and assign(ContractState, finish);
+		
+		//Tenant delays management fee for 3 months, landlord terminates contract
+		rule6: If: isDone(rule1) and isTime(payTime + payduration + time1), Landlord assign(ContractState, terminate);
+		
+		//Unilateral contract termination with penalty 3000
+		rule7: If: !isTime(finishTime),
+		Landlord transfer(Tenant, penalty) and assign(ContractState, terminate);
+		
+		rule8:
+		If: !isTime(finishTime),
+		Tenant transfer(Landlord, penalty) and assign(ContractState, terminate)
+	}
+	Require:isDone,isTime,isTrue,transfer;
+}

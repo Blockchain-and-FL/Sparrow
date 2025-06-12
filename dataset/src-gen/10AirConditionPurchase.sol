@@ -1,16 +1,14 @@
 pragma solidity >=0.7.0 <0.9.0;
-import "./DateTime.sol"; 
 contract AirConditionPurchase  
 { 
-	DateTime public datetime=DateTime(0xd9145CCE52D386f254917e481eB44e9943F39138);
-	string place = "Administration Building" ;
-	uint256 giveTime = datetime.toTimestamp(2023,1,19,0,0);
-	string faultName = "" ;
-	ufixed amount = 0 ;
-	bool checkResult = false ;
-	uint256 period = 2592000 ;
-	uint dayNum = 0 ;
-	ufixed Proportion = 0.05 ;
+	string public place = "Administration Building" ;
+	uint256 public giveTime = 1674086400;
+	string public faultName = "" ;
+	uint public amountMoney = 0 ;
+	bool public checkResult = false ;
+	uint256 public period = 2592000 ;
+	uint public dayNum = 0 ;
+	uint256 public Proportion = 50.0 ;
 	string public ContractState="start";
 	mapping(string => bool) public functionStatus;
 	mapping(string => uint) public functionFinishTime;	
@@ -18,23 +16,21 @@ contract AirConditionPurchase
 		string name;
 		address payable account;
 	}
-	struct Ca {
+	struct Aa {
 		string name;
 		address payable account;
-		uint256 key;
-		uint256 year;
 	}
 		struct token {
 		   string   name ;
 		   string   ID ;
 		   uint   number ;
-		   ufixed   unit_price ;
+		   uint   unit_price ;
 		   uint   price ;
 	}
 	
 	Person public Buyer = Person("Hubei Industrial Vocational and Technical College", payable(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4));
 	Person public Seller = Person("Shiyan Shengda Feike Industry and Trade Co., Ltd.", payable(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4));
-	Ca public Arbitration = Ca("arbitration institution", payable(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4));
+	Aa public Arbitration = Aa("arbitration institution", payable(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4));
 	modifier onlyBuyer(){
 		require(msg.sender == Buyer.account,"Only Buyer can access this.");
 		 _; 
@@ -49,7 +45,7 @@ contract AirConditionPurchase
 	}
 	token public Service = token("GREE AirCondition", "1KFR-72LW/(72542)FNhAa -B1JYO1", 1, 6800, 6800);
 	constructor() {
-	// Initialize the group
+	// 初始化群组
 	}
 	event completedRule(address indexed person, string rulename);
 	function end() internal{
@@ -69,7 +65,7 @@ contract AirConditionPurchase
 		else return false;
 	}
 	function rule2() public payable onlyState(ContractState) onlySeller unDone("rule2"){
-		if(logic(block.timestamp,giveTime,"==")){
+		if(isTime(giveTime)||!isTime(giveTime+86400)){
 			functionStatus["rule2"] = true;
 			functionFinishTime["rule2"]=block.timestamp;
 			emit completedRule(msg.sender,"rule2");
@@ -78,7 +74,7 @@ contract AirConditionPurchase
 	function rule2_2(uint _dayNum) public payable onlyState(ContractState) onlySeller unDone("rule2_2"){
 		dayNum = _dayNum;
 		if(isTime(giveTime)||!isTime(giveTime+period)||!isDone("rule2")){
-			transferTo(Buyer.account,dayNum*Proportion*Service.price);
+			transferTo(Buyer.account,10**14*dayNum*Service.price*Proportion/1000);
 			functionStatus["rule2_2"] = true;
 			functionFinishTime["rule2_2"]=block.timestamp;
 			emit completedRule(msg.sender,"rule2_2");
@@ -95,7 +91,7 @@ contract AirConditionPurchase
 	function rule3(bool _checkResult) public payable onlyState(ContractState) onlyBuyer unDone("rule3"){
 		checkResult = _checkResult;
 		if(delivery1()||delivery2()){
-			transferTo(Seller.account,Service.price);
+			transferTo(Seller.account,10**14*Service.price);
 			end();
 			if(!isTrue(checkResult)){
 				ContractState="terminate";
@@ -107,52 +103,52 @@ contract AirConditionPurchase
 	}
 	function rule4() public payable onlyState(ContractState) onlyBuyer unDone("rule4"){
 		if(delivery1()||delivery2()||!isDone("rule3")){
-			transferTo(Seller.account,Service.price*Proportion);
+			transferTo(Seller.account,10**14*Service.price*Proportion/1000);
 			ContractState="terminate";
 			functionStatus["rule4"] = true;
 			functionFinishTime["rule4"]=block.timestamp;
 			emit completedRule(msg.sender,"rule4");
 		}
 	}
-	function arbitrationClause(string _faultName, ufixed _amount) public payable onlyState(ContractState) onlyArbitration unDone("arbitrationClause"){
+	function arbitrationClause(string memory _faultName, uint _amountMoney) internal onlyArbitration unDone("arbitrationClause"){
 		faultName = _faultName;
-		amount = _amount;
+		amountMoney = _amountMoney;
 			functionStatus["arbitrationClause"] = true;
 			functionFinishTime["arbitrationClause"]=block.timestamp;
 			emit completedRule(msg.sender,"arbitrationClause");
 	}
-	function buyer_fault() public payable onlyState(ContractState) onlyBuyer unDone("buyer_fault"){
-		if(isDone("arbitrationClause")||logic(faultName,Buyer.name,"==")){
-			transferTo(Seller.account,amount);
+	function buyer_fault() internal onlyBuyer unDone("buyer_fault"){
+		if(isDone("arbitrationClause")||compareStrings(faultName,Buyer.name)){
+			transferTo(Seller.account,10**14*amountMoney);
 			end2();
 			functionStatus["buyer_fault"] = true;
 			functionFinishTime["buyer_fault"]=block.timestamp;
 			emit completedRule(msg.sender,"buyer_fault");
 		}
 	}
-	function seller_fault() public payable onlyState(ContractState) onlySeller unDone("seller_fault"){
-		if(isDone("arbitrationClause")||logic(faultName,Seller.name,"==")){
-			transferTo(Buyer.account,amount);
+	function seller_fault() internal onlySeller unDone("seller_fault"){
+		if(isDone("arbitrationClause")||compareStrings(faultName,Seller.name)){
+			transferTo(Buyer.account,10**14*amountMoney);
 			end2();
 			functionStatus["seller_fault"] = true;
 			functionFinishTime["seller_fault"]=block.timestamp;
 			emit completedRule(msg.sender,"seller_fault");
 		}
 	}
-	// Check if a specific function has been executed
+	// 检查某个功能是否已经执行
 	function isDone(string memory functionName) internal view returns (bool) {
 	    return functionStatus[functionName];
 	}
-	// Function to determine if the specified time has been reached
+	// 用于判断是否达到指定时间的函数
 	function isTime(uint256 targetTime) internal view returns (bool) {
 	    return block.timestamp >= targetTime;
 	}
-	Function to check if the value is true.
+	// 带参数的函数，用于检查值是否为 true
 	function isTrue(bool valueToCheck) internal pure returns (bool) {
 	    return valueToCheck == true;
 	}
-	event Transfer(address indexed from, address indexed to, uint256 amount);
-	// Transfer to a specified address
+	event Transfer(address indexed from, address indexed to, uint amount);
+	// 用于给指定地址转账
 	function transferTo(address payable recipient, uint amount) internal {
 	    require(recipient != address(0), "Invalid recipient address");
 	    require(amount > 0, "Amount must be greater than zero");
@@ -164,13 +160,13 @@ contract AirConditionPurchase
         _;
     }
 	event ContractStateChange(string newState);
-	// Custom modifier: Allow or prohibit execution based on string parameter value
+	// 自定义 modifier：根据字符串参数值允许或禁止执行
 	modifier onlyState(string memory State) {
 	    require(compareStrings(State, "start") || compareStrings(State, "restart"), "Not allowed in this state");
 	     emit ContractStateChange(State);
 	    _;
 	}
-	// Helper function to compare if two strings are equal
+	// 辅助函数，比较两个字符串是否相等
 	function compareStrings(string memory a, string memory b) internal pure returns (bool) {
 	    return (keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b)));
 	}

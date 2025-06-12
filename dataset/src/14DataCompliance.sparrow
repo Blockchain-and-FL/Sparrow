@@ -1,0 +1,100 @@
+Contract dataCompliance {
+    PA DataController
+    PA DataProcessor
+    PA SubProcessor
+
+    Token PersonalData {
+        string subjectId,
+        string dataType,
+        string value,
+        date   collectionTime,
+        uint status // access, update, deleted, returned, portable: 0 1 2 3 4
+    }
+    Token DataBreach {
+        uint   id,
+        string breachType,
+        date   occurredAt,
+        bool   notifiedController
+    }
+
+    Init {
+        DataController controller = ('Controller', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+        DataProcessor processor = ('Processor', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+        SubProcessor subprocessor = ('SubProcessor', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4'),
+        DataBreach lastBreach = (0, '', 2038/01/01, 00:00, false)
+        PersonalData record1 = ('user1', 'email', 'user@example.com', 2024/05/01,00:00, 0)
+    }
+
+    ContractMessage {
+        bool    hasBreachOccurred = false,
+        date    contractStartDate = 2024/01/01,00:00,
+        date    contractEndDate = 2026/01/01,00:00,
+        bool    isTerminated = false,
+        bool 	authorizedForSub = false,
+        bool    isControllerAuditRequested = false,
+        bool    subProcessorApproved = false,
+        bool    dataDeletedOrReturned = false,
+        uint    dataStatus=0
+    }
+
+    Conditions [
+        contractOngoing: !isTrue(isTerminated) and isTime(contractStartDate) and !isTime(contractEndDate),
+        breachNotifyDue: isTrue(hasBreachOccurred) and isTime(o lastBreach.occurredAt + 3 days),
+        processorMustAssist: isTrue(isControllerAuditRequested),
+        subProcessorAllowed: isTrue(subProcessorApproved),
+        endOfContract: isTime(contractEndDate)
+    ]
+
+    Operations [
+        notifyControllerOp: change(CM hasBreachOccurred, false) and assign(o lastBreach.notifiedController, true)
+    ]
+
+    Rules {
+    	// Controller gives instructions on data processing
+    	giveInstructions:
+    	SetMessage(uint dataStatus) controller;
+
+       // Processor executes instructions according to controller's instruction
+        Repeat obeyInstructions:
+        If: contractOngoing  and isDone(giveInstructions) and logic(dataStatus,4,<=) or logic(dataStatus,0,>=),
+        processor assign(o record1.status,dataStatus) and assign(giveInstructions, false)
+		
+		// Controller initiates audit
+		ControllerAuditRequested:
+		SetMessage(bool isControllerAuditRequested) controller;
+		
+         // Sub-processor use must be explicitly authorized
+        allowSubProcessorUse:
+        If: subProcessorAllowed,
+        controller change(CM authorizedForSub, true)
+        
+        // Sub-processor processes data after authorization
+        Repeat ProcessBySub:
+        If: isDone(allowSubProcessorUse) and isTrue(authorizedForSub) and isDone(giveInstructions),
+        subprocessor assign(o record1.status,dataStatus)
+           
+        // Processor detects data breach
+		foundBreach:
+		SetMessage(bool hasBreachOccurred)
+		processor change(CM hasBreachOccurred, true) 
+		
+        // If breach occurs, must notify controller within 3 days
+        Repeat notifyBreach:
+        If: breachNotifyDue,
+        processor notifyControllerOp
+	
+        // On contract termination, data must be deleted or returned
+        endAgreementDataHandling:
+        SetMessage(uint dataStatus)
+        If: endOfContract and !isTrue(dataDeletedOrReturned),change(CM dataDeletedOrReturned, true) 
+        SubRule{
+        	If: logic(dataStatus,2,==),assign(o record1.status, 2) //delete
+        }
+        SubRule{
+        	If: logic(dataStatus,3,==),assign(o record1.status, 3) //return
+        }
+
+    }
+
+    Require: isTrue, isDone, isTime, compareString, logic, transfer,timeSub;
+}

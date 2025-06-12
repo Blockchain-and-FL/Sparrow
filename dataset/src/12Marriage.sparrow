@@ -1,0 +1,97 @@
+Contract marriage{
+	PA Person
+	Token Gift{string description, string giver, string receiver,uint amount,bool isSigned}	// gifts over a certain amount require a signature
+  	Token Asset {
+        string name,
+        uint value,
+        string owner,
+        bool independent   // whether this is an independent asset
+    }
+    Token ServiceReport {
+        uint id,
+        uint amount,
+        date   reportTime,
+        bool   paid
+    }
+
+	Init{
+		Person spouseA = ('spouseA',a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		Person spouseB = ('spouseB',a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB')
+		Person currentServant = ('currentServant',a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB'),
+     	Gift giftSumA=('','B','A',2000,true)	 // Gift from B to A
+     	Gift giftSumB=('','A','B',2000,true)  
+     	// Examples of independent assets (add more as needed)
+        Asset home         = ('HomeProperty', 500000.00, 'spouseA', true)
+        Asset car          = ('CarModelX',     30000.00,  'spouseB', true)
+        // Initial value of jointly owned assets
+        Asset jointFund    = ('JointFund',     0.00,      'contract', false)
+    	ServiceReport service= (0,0,2038/01/01,00:00,false)
+	}
+	ContractMessage{
+		bool isSpouseADead=false,
+		bool isSpouseBDead=false,	 // whether the spouse has passed away
+		bool isSeperate=false,	// whether separated
+		date cohabitStartTime=2000/07/10,00:00,
+		uint jointFundValue=0,
+		bool hasVacateNotice=false,
+		bool isAllowedResident=true, 	// permission to reside in A’s independent property
+		date noticeTime=2038/01/01,00:00,
+		date sepStartTime=2038/01/01,00:00,	 // default future date for separation start
+		duration separationPd   = 90 days,   // separation period before asset division
+        duration vacatePd       = 30 days,   // vacate notice period
+        duration serviceWindow  = 14 days    // grace period for service payment
+	}
+	
+	Conditions [
+        vacateCon: isTrue(hasVacateNotice) and isTime(noticeTime + vacatePd)
+    ]
+    
+    Operations [
+    	shareAssetOp: transfer(spouseA,jointFundValue*0.5) and transfer(spouseB,jointFundValue*0.5) 
+    ]
+
+	Rules{		
+		
+		// Update joint asset value
+		Repeat updateJoiontFund:
+		SetMessage(uint jointFundValue)
+		assign(o jointFund.value, jointFundValue)
+		
+		// Update joint asset value
+		shareAssetByDead:
+		SetMessage(bool isSpouseADead,bool isSpouseBDead, uint jointFundValue)
+		If: isTrue(isSpouseADead) or isTrue(isSpouseBDead),
+		assign(o jointFund.value, jointFundValue) and shareAssetOp
+		
+		// Update joint asset value
+		Repeat recordSepStartTime:
+		change(CM isSeperate, true) and assign(sepStartTime,now)
+		
+		/// Record separation end time
+		Repeat recordSepEndTime:
+		change(CM isSeperate, false)
+		
+		// Separation over 90 days triggers joint asset division
+		shareAssetBySep:
+		SetMessage(uint jointFundValue)
+		If: !isDone(shareAssetByDead) and isTrue(isSeperate) and isTime(sepStartTime+separationPd),
+		assign(o jointFund.value, jointFundValue) and shareAssetOp
+		
+		// Vacate notice related to independent property
+		vacateNotice:
+		change(CM hasVacateNotice, true) and assign(noticeTime, now)
+		
+		// Enforce move-out after notice period
+		vacateEnforce:
+		If: isDone(vacateNotice) and vacateCon,
+		change(CM isAllowedResident, false)
+
+		// Pay for service within grace period
+		Repeat servicePay:
+		If: !isTrue(o service.paid) and isTime(o service.reportTime+serviceWindow),
+		transfer(currentServant,o service.amount) and assign(o jointFund.value, o jointFund.value-o service.amount) and  assign(o service.paid, true)
+
+
+	}
+	Require: isDone, isTime,isTrue, logic, compareString,transfer, timeSub;
+}

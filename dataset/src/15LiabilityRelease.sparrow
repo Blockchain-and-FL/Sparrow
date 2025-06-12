@@ -1,0 +1,106 @@
+Contract LiabilityRelease {
+    PA Person
+
+    Token Risk {
+        string description,
+        bool acknowledged
+    }
+
+    Token Waiver {
+        string cause,
+        string consequence,
+        bool isWaived
+    }
+
+    Token DamageClaim {
+        string reason,
+        string liableParty, // party being held liable (defendant)
+        string victim,       // party suffering damage (claimant)
+        uint amount,
+        bool resolved
+    }
+
+    // If the releasor causes serious harm by violating obligations,
+    // e.g. causing fire or malicious destruction, the releasee can claim damages back.
+
+    Init {
+        Person releasor  = ('Releasor', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4') // Party waiving the right to sue
+        Person releasee  = ('Releasee', a'0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB'), // Party being released from liability
+
+        Risk risk1 = ('Physical injury (e.g., sprains, fractures)', false)
+        Risk risk2 = ('Psychological stress or discomfort', false)
+        Risk risk3 = ('Equipment malfunction', false)
+        Risk risk4 = ('Weather-related accidents', false)
+
+        Waiver waiver1 = ('Physical injury during activity', 'No liability to Releasee', false)
+        Waiver waiver2 = ('Equipment failure', 'No liability to Releasee', false)
+        Waiver waiver3 = ('Unforeseen weather risks', 'No liability to Releasee', false)
+
+        DamageClaim claim = ('No claim yet', "releasor", "releasee", 0.0, true)
+    }
+
+    ContractMessage {
+        bool voluntarySigned = false,
+        bool waiverConfirmed = false,
+        bool allRisksAcknowledged = false,
+        bool damagePending = false,
+        bool claimResolved = true,
+        date activityDate = 2025/06/15, 09:00,
+        date signTime = 2023/06/01, 12:00,
+        string emergencyContact = 'Wang Fang',
+        string emergencyPhone = '+65 9123 4567'
+    }
+
+    Conditions [
+        canClaim:      isTime(activityDate) and isTime(activityDate + 1 days),
+        validClaim1:   compareString(o claim.liableParty, s releasor.name) and compareString(o claim.victim, s releasee.name),
+        validClaim2:   compareString(o claim.liableParty, s releasee.name) and compareString(o claim.victim, s releasor.name),
+        canArchive:    isTime(activityDate + 1 days)
+    ]
+
+    Operations [
+        confirmConsent:       change(CM voluntarySigned, true),
+        acceptAllRisks:       assign(o risk1.acknowledged, true) and assign(o risk2.acknowledged, true) and assign(o risk3.acknowledged, true) and assign(o risk4.acknowledged, true),
+        waiveAllLiabilities:  assign(o waiver1.isWaived, true) and assign(o waiver2.isWaived, true) and assign(o waiver3.isWaived, true),
+        resolveClaim:         assign(o claim.resolved, true) and change(CM damagePending, false) and change(CM claimResolved, true)
+    ]
+
+    Rules {
+        // Releasor signs the agreement
+        signAgreement:
+        If: isTime(signTime) and !isTime(signTime + 1 days),
+        releasor confirmConsent and acceptAllRisks and waiveAllLiabilities
+        and change(CM waiverConfirmed, true)
+        and change(CM allRisksAcknowledged, true)
+
+        // Either party submits a claim
+        submitClaim:
+        SetMessage(new string liableParty, new string victim, new string reason, new uint amount)
+        If: isDone(signAgreement) and canClaim and isTrue(voluntarySigned) and !isTrue(damagePending),
+        SubRule {
+            If: validClaim1 or validClaim2,
+            assign(o claim.reason, reason) and assign(o claim.liableParty, liableParty)
+            and assign(o claim.victim, victim) and assign(o claim.amount, amount)
+            and assign(o claim.resolved, false)
+            and change(CM damagePending, true)
+            and change(CM claimResolved, false)
+        }
+
+        // Compensation payment (based on roles)
+        payCompensation:
+        If: isDone(submitClaim) and isTrue(damagePending) and !isTrue(claimResolved),
+        SubRule {
+            If: validClaim1, releasor transfer(releasee, o claim.amount) and resolveClaim
+        }
+        SubRule {
+            If: validClaim2, releasee transfer(releasor, o claim.amount) and resolveClaim
+        }
+
+        // Contract archive (only after activity date and no pending claims)
+        archiveAgreement:
+        If: canArchive and !isTrue(damagePending),
+        releasee assign(ContractState, finish)
+    }
+
+    Require: isTime, isTrue, isDone, logic, transfer, compareString, timeSub;
+}

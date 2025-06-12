@@ -1,0 +1,89 @@
+Contract PrinterPurchase{
+	PA Person
+	CA Ca
+	Token token{
+	  string name,
+	  string ID,	
+	  uint number,
+	  ufixed unit_price,
+	  uint price
+	}
+	Init {
+		Person Buyer = ('Huangshi No. 2 Middle School', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		Person Seller = ('The Yellowstone Difficult Area Dufenghe Skills Full Line', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		Ca Arbitration = ('arbitration institution', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4'),
+		token Service =('printer','CANONLBP2900+',1,1600,1600) 
+	}
+	ContractMessage{
+	  string place='Huangshi No. 2 Middle School',
+	  date giveTime=2022/12/16,00:00,
+	  string faultName='',
+	  ufixed amount=0,
+	  bool checkResult=false,
+	  duration period=30 days,
+	  uint dayNum=0,
+	  ufixed Proportion=0.05
+	}
+	
+	Conditions[
+		delivery1: isDone(rule2) and within 5 days after rule2 ,
+		delivery2: isDone(rule2_2) and within 5 days after rule2_2
+	]
+	
+	Operations[
+		end:assign(ContractState,finish),
+		end2: assign(ContractState,terminate)
+	]
+	
+	Rules{
+		// Seller delivers the goods on time
+		rule2:
+		If: logic(now,giveTime,==),
+		Seller;
+		
+		// Seller delivers late but within 30 days
+		rule2_2:
+		SetMessage(uint dayNum)
+		If: isTime(giveTime) and !isTime(giveTime+period) and !isDone(rule2),
+		Seller transfer(Buyer,dayNum*Proportion*o Service.price)
+		
+		// Seller fails to deliver within 30 days, contract is terminated
+		rule2_3:
+		If: isTime(giveTime+period) and !isDone(rule2) and !isDone(rule2_2),
+		Buyer assign(ContractState,terminate);
+		
+		// Buyer confirms goods, quality fails -> return and terminate
+		rule3:
+		SetMessage(bool checkResult)
+		If: delivery1 or delivery2 ,
+		Buyer transfer(Seller,o Service.price) and end
+		SubRule{
+			If:!isTrue(checkResult),
+			assign(ContractState,terminate)
+		};
+		
+		// Buyer rejects goods without reason
+		rule4:
+		If: delivery1 or delivery2 and !isDone(rule3),
+		Buyer transfer(Seller,o Service.price*Proportion) and assign(ContractState,terminate)
+		
+		
+		// Arbitration decides the party at fault, penalty is paid by faulty party
+		Additional[
+		arbitrationClause:
+		SetMessage(string faultName,ufixed amount)
+		Arbitration;
+		
+		buyer_fault:
+		If: isDone(arbitrationClause) and logic(faultName,s Buyer.name,==),
+		Buyer transfer(Seller,amount) and end2;
+		
+		seller_fault:
+		If: isDone(arbitrationClause) and logic(faultName,s Seller.name,==),
+		Seller transfer(Buyer,amount) and end2
+		]
+		
+	}
+	
+	Require:isDone,isTime,isTrue,transfer;
+}

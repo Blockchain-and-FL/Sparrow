@@ -1,0 +1,31 @@
+Contract DaliyPurchase{
+	PA Person
+	Token token{
+	  string name,
+	  string ID,	
+	  uint number,
+	  ufixed unit_price,
+	  uint price
+	}
+	Init {
+		Person Buyer = ('Wuhan Caidian District Justice Bureau', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4')
+		Person Seller = ('Shengxing Hardware Store, Caidian District, Wuhan City', a'0x5B38Da6a701c568545dCfcB03FcB875f56beddC4'),
+		token Service =('Daliy','many',1,4801,4801) 
+	}
+	ContractMessage{
+	  string place='',
+	  date giveTime=0
+	}
+	Rules{
+		// Buyer notifies the delivery time and place
+		rule1: SetMessage(string place,uint giveTime) Buyer;		
+				
+		// Seller delivers the goods at the specified time
+		rule2: If: logic(now,giveTime,==), Seller;	
+		
+		// Buyer confirms receipt, pays, and contract is finished
+		rule3: If: isDone(rule2), Buyer transfer(Seller,o Service.price) and assign(ContractState,finish)
+	}
+	
+	Require:isDone,transfer;
+}
