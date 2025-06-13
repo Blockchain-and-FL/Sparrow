@@ -34,7 +34,6 @@ actiontype:
 
 Initialize:
 	{Initialize} 'Init' '{'
-	(inits+=initExpressions)* ','
 	(inito+=initExpressiono)*
 	'}'
 ;
