@@ -136,7 +136,7 @@ contract HouseRent
 		}
 	}
 	function houseCheck(bool _checkresult) public payable onlyState(ContractState) onlyLandlord unDone("houseCheck"){
-		bool checkresult = _checkresult;   // 使用正确的类型进行赋值
+		bool checkresult = _checkresult;   // Assign using the correct data type
 		if(isTime(finishTime)){
 			ContractState="terminate";
 			house.useRight="Landlord.name";
@@ -191,15 +191,15 @@ contract HouseRent
 			functionFinishTime["regulatoryTerminate"]=block.timestamp;
 			emit completedRule(msg.sender,"regulatoryTerminate");
 	}
-	// 检查某个功能是否已经执行
+	// Check whether a specific function has already been executed
 	function isDone(string memory functionName) internal view returns (bool) {
 	    return functionStatus[functionName];
 	}
-	// 用于判断是否达到指定时间的函数
+	// Check if the current time reaches the target time
 	function isTime(uint256 targetTime) internal view returns (bool) {
 	    return block.timestamp >= targetTime;
 	}
-	// 辅助函数，根据比较符号执行比较
+	// Helper function to perform comparisons based on a comparison operator
 	    function compare(uint a, uint b, string memory op) internal pure returns (bool) {
 	        if (compareStrings(op, ">")) {
 	            return a > b;
@@ -218,12 +218,12 @@ contract HouseRent
 	    }
 	
 	
-	    // 只有当满足条件 valueA > valueB 时，才能执行 setValue 函数
+	    // Only allow execution of the setValue function if the condition valueA > valueB is met
 	    function logic(uint256 valueA, uint256 valueB, string memory symbol) internal pure returns (bool) {
 	        return compare(valueA, valueB, symbol);
 	    }
 	event Transfer(address indexed from, address indexed to, uint amount);
-	// 用于给指定地址转账
+	// Used to transfer funds to a specified address
 	function transferTo(address payable recipient, uint amount) internal {
 	    require(recipient != address(0), "Invalid recipient address");
 	    require(amount > 0, "Amount must be greater than zero");
@@ -235,13 +235,13 @@ contract HouseRent
         _;
     }
 	event ContractStateChange(string newState);
-	// 自定义 modifier：根据字符串参数值允许或禁止执行
+	// Custom modifier: allow or restrict execution based on the value of a string parameter
 	modifier onlyState(string memory State) {
 	    require(compareStrings(State, "start") || compareStrings(State, "restart"), "Not allowed in this state");
 	     emit ContractStateChange(State);
 	    _;
 	}
-	// 辅助函数，比较两个字符串是否相等
+	// Helper function to compare whether two strings are equal
 	function compareStrings(string memory a, string memory b) internal pure returns (bool) {
 	    return (keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b)));
 	}

@@ -30,7 +30,7 @@ contract DaliyPurchase
 	}
 	token public Service = token("Daliy", "many", 1, 4801, 4801);
 	constructor() {
-	// 初始化群组
+	// Initialize the group
 	}
 	event completedRule(address indexed person, string rulename);
 	function rule1(uint16 _year,uint8 _months,uint8 _days,uint8 _hours,uint8 _minutes,string memory _place) public payable onlyState(ContractState) onlyBuyer unDone("rule1"){
@@ -56,19 +56,19 @@ contract DaliyPurchase
 			emit completedRule(msg.sender,"rule3");
 		}
 	}
-	// 检查某个功能是否已经执行
+	// Check whether a specific function has already been executed
 	function isDone(string memory functionName) internal view returns (bool) {
 	    return functionStatus[functionName];
 	}
 	event Transfer(address indexed from, address indexed to, uint amount);
-	// 用于给指定地址转账
+	// Used to transfer funds to a specified address
 	function transferTo(address payable recipient, uint amount) internal {
 	    require(recipient != address(0), "Invalid recipient address");
 	    require(amount > 0, "Amount must be greater than zero");
 	    recipient.transfer(amount);
 	    emit Transfer(msg.sender,recipient, amount);
 	}
-	// 用于判断是否达到指定时间的函数
+	// Check if the current time reaches the target time
 	function isTime(uint256 targetTime) internal view returns (bool) {
 	    return block.timestamp >= targetTime;
 	}
@@ -124,13 +124,13 @@ contract DaliyPurchase
         _;
     }
 	event ContractStateChange(string newState);
-	// 自定义 modifier：根据字符串参数值允许或禁止执行
+	// Custom modifier: allow or restrict execution based on the value of a string parameter
 	modifier onlyState(string memory State) {
 	    require(compareStrings(State, "start") || compareStrings(State, "restart"), "Not allowed in this state");
 	     emit ContractStateChange(State);
 	    _;
 	}
-	// 辅助函数，比较两个字符串是否相等
+	// Helper function to compare whether two strings are equal
 	function compareStrings(string memory a, string memory b) internal pure returns (bool) {
 	    return (keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b)));
 	}
