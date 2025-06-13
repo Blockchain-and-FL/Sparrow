@@ -84,7 +84,7 @@ type:
 ;
 
 Value:
-//这样的话，要表达NULL就要双引号了
+// express NULL with "" 
     AllNumber|Right|ThisDate|ThisBoolean|url|ThisDecimal|Address|ThisString|Duration|Now;
 
 Duration:
@@ -193,7 +193,7 @@ RegularRuleExpression:
 ;
 
 AdditionExpression:
-	//全局允许触发条款或者限定时间内允许触发，默认是全局允许触发
+	// Clause triggering is allowed globally or within a limited time; default is global triggering
 	'Additional''['
 	 ruleExpression+=RuleExpression (';' ruleExpression+=RuleExpression)*
 	']'
@@ -247,7 +247,7 @@ RuleExpression:
 	(setdate=setDateExpression)?
 	(totalCondition=TotalCondition)? 
 	 totalOperation=TotalOperation
-	//加了这个以后多了好多警告，数都数不清，原本只有六个警告的
+	// more warnings after adding these
 	(subExpression+=SubExpression)*
 	(elseExpression=ElseExpression)?
 ;
@@ -260,7 +260,7 @@ SubExpression:
 	'SubRule''{' totalExpression=TotalExpression'}'
 ;
 
-//感觉可以把这个废弃，就和平行网关一样，其实就是完成一个rule但是没完成另一个rule
+// similar to parallel rules, where a rule is completed but another rule failed
 FailResult:
 	'FailResult:' 
 	((followingOperation=trueOperation)|(linkOperation=[OperateLink]))
@@ -297,7 +297,7 @@ TimeSub:
 ;
 
 EachTime:
-//	一个月按30天算
+//	one month calculated as 30 days
 	'years'|'months'|'days'|'hours'|'mins'
 ;
 
@@ -388,7 +388,7 @@ everyMessage:
 	(symbol="new")? type=type message=ID
 ;
 
-//这里也会有警告，在加了|value=[keyvalue]以后
+//warnings after adding |value=[keyvalue]
 transferExpression:
 	'transfer('(person=[initExpressions]) ',' value=MixExpression ')'	
 ;
@@ -401,7 +401,7 @@ changeString:
 ;
 
 otherchange:
-	//singleExpression的话就没有警告
+	//if singleExpression, no warnings
 	'assign(' changeThing=MixExpression ',' changeResult=(MixExpression)')'
 ;
 
