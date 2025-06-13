@@ -235,7 +235,7 @@ contract partnership
 	    emit Transfer(msg.sender,recipient, amount);
 	}
 	function compareTimestamps(uint256 timestamp1, uint256 timestamp2, uint256 customSeconds, string memory operator) internal pure returns (bool) {
-	       // 计算两个时间戳的差值（取绝对值，确保差值为正数）
+	       // Calculate the difference between two timestamps (take absolute value to ensure the result is positive)
 	       uint256 timeDifference = timestamp1 - timestamp2;
 	       if (keccak256(bytes(operator)) == keccak256(bytes(">"))) {
 	           return timeDifference > customSeconds;
