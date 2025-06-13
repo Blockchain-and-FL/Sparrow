@@ -77,7 +77,7 @@ import org.xtext.example.mydsl.sparrow.transferExpression
 import org.xtext.example.mydsl.sparrow.url
 import org.xtext.example.mydsl.sparrow.initExpressions
 import org.xtext.example.mydsl.sparrow.initExpressiono
-
+import org.eclipse.emf.ecore.EObject
 /**
  * Generates code from your model files on save.
  * 
@@ -85,20 +85,27 @@ import org.xtext.example.mydsl.sparrow.initExpressiono
  */
 class SparrowGenerator extends AbstractGenerator {
 	
-	//time constraints
+	//时间限制
 	var int time = 1
-	//conditions done counts
+	//条件完成数
 	var int con = 1
-	//exclusive gateway amount
+	//排他网关数量
 	var int exclu = 1
 	override void doGenerate(Resource res, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		for (e : res.allContents.toIterable.filter(Model)){
+		
+		val astNodeCount = countASTNodes(e)
+			println(e.name + " AST Node Count: " + astNodeCount)	//new added for calculating ast of sparrow
 		
 		val currentDateTime1 = LocalDateTime.now()
 		
 		fsa.generateFile(
 		"sparrow2solidity/" + e.name + ".sol",
 		e.compileSolidity)
+		
+		fsa.generateFile(
+		"sparrow2go/" + e.name + ".go",
+		e.compileGo)
 		
 		val currentDateTime2 = LocalDateTime.now()
 		val duration = ChronoUnit.MILLIS.between(currentDateTime1, currentDateTime2)
@@ -107,7 +114,1108 @@ class SparrowGenerator extends AbstractGenerator {
 		}
 	}
 	
-
+//	def compileGo(Model model)'''
+//	this is a go file.
+//	'''
+	
+	def Integer countASTNodes(EObject element) {
+	    if (element === null) return 0
+	    var Integer count = 1 // 显式声明为 Integer
+	    for (child : element.eContents) {
+	        count = count + countASTNodes(child) // 避免 += 可能的类型推断错误
+	    }
+	    return count
+	}
+	
+	
+	
+	def compileGo(Model model)'''
+	package main
+	import (
+		"encoding/json"
+		"fmt"
+		"log"
+		"strings"
+		"time"
+		«FOR name : model.packageName»
+		import "«name»";
+		«ENDFOR»
+	
+		"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	)
+	type «model.name» struct {
+		contractapi.Contract
+		functionStatus map[string]bool
+		functionFinishTime map[string]int
+		contractState string
+	}
+«««	go里面没有继承
+	«FOR subject:model.subjects»
+		«subject.compileSubjectGo»
+	«ENDFOR»
+	
+	«FOR object:model.objects»
+		«object.compileObjectGo»
+	«ENDFOR»
+	
+	«IF model.contractMessage !== null»
+		«model.contractMessage.compileMessageGo»
+	«ENDIF»
+	func (s *SmartContract) Init(ctx contractapi.TransactionContextInterface) error {
+«««	初始化所有信息
+	«IF model.initialize !== null»
+		«model.initialize.compileInitGo»
+	«ENDIF»
+	
+	«FOR group : model.group»
+		«group.compileGroupGo»
+	«ENDFOR»
+	
+	«IF model.contractMessage !== null»
+		«model.contractMessage.compileMessageGo2»
+	«ENDIF»
+	}
+	
+	«IF model.operations !== null»
+		«model.operations.compileOperationGo»
+	«ENDIF»
+	«IF model.conditions !== null»
+		«model.conditions.compileConditionGo»
+	«ENDIF»
+	«IF model.ruleStructures!==null»
+		«model.ruleStructures.compileRuleGo»
+	«ENDIF»
+	
+	«IF model.require !== null »
+		«model.require.compileRequireGo»
+	«ENDIF»
+	
+	// changeRule 方法用于更新 functionStatus 和 functionFinishTime 的值
+	func changeRule(expressionName string) {
+		// 更新 functionStatus
+		functionStatus[expressionName] = true
+		// 更新 functionFinishTime
+		functionFinishTime[expressionName] = time.Now().UTC()
+	}
+	
+	func onlyState(State string) bool {
+		if compareStrings(State, "start") || compareStrings(State, "restart") 
+			return true
+		else return false
+	}
+	
+	func onlySomeone(s Person) {
+		//如何限制角色对功能的调用？
+		//好像也是要链接外部？
+	}
+	
+	func main() {
+		// 初始化Contract结构体的map变量
+		contract := &SimpleContract{
+			functionStatus: make(map[string]bool),
+			functionFinishTime: make(map[string]int), 
+			ContractState: "start",
+		}
+	
+		// 启动Fabric链码服务
+		cc, err := contractapi.NewChaincode(contract)
+		if err != nil {
+			fmt.Printf("Error starting SimpleContract chaincode: %v\n", err)
+			return
+		}
+	
+		if err := cc.Start(); err != nil {
+			fmt.Printf("Error starting SimpleContract chaincode: %v\n", err)
+		}
+		
+	«FOR i : model.ruleStructures.manyRuleExpression»
+		«i.compileManyRuleGo»
+	«ENDFOR»
+	}
+	'''
+		
+	def compileGroupGo(Group group){
+		var string1=''
+		var boolean first=true
+		for(i:group.value){
+			if(!first){
+			string1+=','+i.name
+			}
+			else {
+				string1+=i.name
+				first=false
+			}
+			}
+		string1=group.name+':= []'+group.subtype.name+'{'+string1+'}'
+		return string1
+	}
+			
+	def compileSubjectGo(Subject subject)'''
+	type «subject.name» struct {
+	  MSPID  string `json:"MSPID"`
+	  Name   string `json:"name"`
+	«IF subject.type == "CA"»
+	Key  int `json:"key"`
+	Year   int `json:"year"`
+	«ENDIF»
+	«IF subject.subjectExpression !== null»
+		«subject.subjectExpression.compileSubjectExpressionGo»
+	«ENDIF»
+	}
+	'''
+	
+	def compileSubjectExpressionGo(SubjectExpression SuE)'''
+	«FOR key :  SuE.keyValue»
+		«IF key.type == "fixed"»
+		«key.name.toFirstUpper»	float `json:"«key.name»"`
+		«ELSEIF key.type == "date"»
+		«key.name.toFirstUpper»	string `json:"«key.name»"`
+		«ELSE»
+		«key.name.toFirstUpper» «key.type» `json:"«key.name»"`
+		«ENDIF»
+	«ENDFOR»
+	'''
+	
+	def compileObjectGo(Object object)'''
+	type «object.name» struct {
+	«IF object.objectExpression !== null»
+		«object.objectExpression.compileObjectExpressionGo»
+	«ENDIF»
+	}
+	'''
+	
+	def compileObjectExpressionGo(ObjectExpression ObE)'''
+	«FOR key :  ObE.keyValue»
+		«IF key.type == "fixed"»
+		«key.name.toFirstUpper»	float `json:"«key.name»"`
+		«ELSEIF key.type == "date"»
+		«key.name.toFirstUpper»	string `json:"«key.name»"`
+		«ELSE»
+		«key.name.toFirstUpper» «key.type» `json:"«key.name»"`
+		«ENDIF»
+	«ENDFOR»
+	'''
+	
+	def compileMessageGo(ContractMessage message)'''
+	type ContractMessage struct{
+		Status string `json:"status"`
+		«FOR key :  message.message»
+			«IF key.type.type == "fixed"»
+				«key.type.name.toFirstUpper» float `json:"«key.type.name»"`
+			«ELSEIF key.type == "date"»
+				«key.type.name.toFirstUpper» string `json:"«key.type.name»"`
+			«ELSE»
+				«key.type.name.toFirstUpper» «key.type.type» `json:"«key.type.name»"`
+			«ENDIF»
+		«ENDFOR»
+	}
+	'''
+	
+	def compileMessageGo2(ContractMessage message)'''
+	contractMessage := ContractMessage{
+		Status: "start",
+		«FOR key :  message.message»
+			«key.type.name.toFirstUpper»: «key.value.compilevalue» ,
+		«ENDFOR» 
+	}
+	'''
+	
+	def compileInitGo(Initialize init)'''
+	«««初始化主体
+			«FOR sinit:init.inits»
+				«sinit.name» := «sinit.subtype.name»{«sinit.compileSinitGo»}
+				«sinit.name»JSON, _ := json.Marshal(«sinit.name»)
+				err := ctx.GetStub().PutState("«sinit.name»", «sinit.name»JSON)
+				if err != nil {
+					return fmt.Errorf("failed to put «sinit.name» to world state. %v", err)
+				}
+			«ENDFOR»
+	«««初始化客体
+			«FOR oinit:init.inito»
+				«oinit.name» := «oinit.obtype.name»{«oinit.compileOinitGo»}
+				«oinit.name»JSON, _ := json.Marshal(«oinit.name»)
+				err := ctx.GetStub().PutState("«oinit.name»", «oinit.name»JSON)
+				if err != nil {
+					return fmt.Errorf("failed to put «oinit.name» to world state. %v", err)
+				}
+			«ENDFOR»
+	'''
+	
+	def compileOinitGo(initExpressiono expressiono){
+		val length=expressiono.value.size
+		var valueString=''
+		for(var i=0; i<length;i++){
+			valueString+=expressiono.obtype.objectExpression.keyValue.get(i).name.toFirstUpper
+			+':'+expressiono.value.get(i).compilevalue+','
+		}
+		return valueString
+	}
+	
+	def compileSinitGo(initExpressions expressions){
+		val length=expressions.value.size
+		var valueString=''
+		if(expressions.subtype.type=='CA'){
+			for(var i=0; i<length;i++){
+				if(i==0){
+					valueString+='Name:'+expressions.value.get(i).compilevalue+','
+				}
+				if(i==1){
+					valueString+='MSPID:'+expressions.value.get(i).compilevalue+','
+				}
+				if(i==2){
+					valueString+='Year:'+expressions.value.get(i).compilevalue+','
+				}
+				if(i==3){
+					valueString+='Key:'+expressions.value.get(i).compilevalue+','
+				}
+				else{
+					if(length>4)
+					valueString+=expressions.subtype.subjectExpression.keyValue.get(i-4).name.toFirstUpper
+					+':'+expressions.value.get(i).compilevalue+','
+				}
+			}
+		}
+		else{
+			for(var i=0; i<length;i++){
+				if(i==0){
+					valueString+='Name:'+expressions.value.get(i).compilevalue+','
+				}
+				if(i==1){
+					valueString+='MSPID:'+expressions.value.get(i).compilevalue+','
+				}
+				else{
+//					println(expressions.name+expressions.subtype.name+'length'+length)
+					if(length>2)
+					valueString+=expressions.subtype.subjectExpression.keyValue.get(i-2).name.toFirstUpper
+					+':'+expressions.value.get(i).compilevalue+','
+				}
+			}
+		}
+		return valueString
+	}
+	
+	def compileConditionGo(Condition condition){
+		var myString = ''''''
+	    for (everycondition : condition.conditions) {
+	        var string1 = 'func (s *SmartContract) ' + everycondition.name + '(ctx contractapi.TransactionContextInterface) bool {'
+	        var string2=''
+	        if(everycondition.conditionExpression!==null)
+	        	if(everycondition.conditionExpression.no!==null)
+	        		string2 ='if (' +'!'+everycondition.conditionExpression.condition.compileTrueCondition
+	        	else
+	        		string2 ='if (' + everycondition.conditionExpression.condition.compileTrueCondition
+	        else if(everycondition.linkCondition!==null)
+	        	if(everycondition.linkCondition.no!==null)
+	        		string2 ='if (' +'!'+everycondition.linkCondition.linkCondition.name+'(ctx)'
+	        	else
+	        		string2 ='if (' + everycondition.linkCondition.linkCondition.name+'(ctx)'
+	        for (everylink : everycondition.andOrLink) {
+	            if (everylink.link == 'and') {
+	            	if(everylink.condition!==null){
+		            	if(everylink.condition.no!==null)
+		                string2 += '&&' +" !"+everylink.condition.condition.compileTrueCondition
+		                else
+		                string2 += '&&' +everylink.condition.condition.compileTrueCondition
+	                }
+	                if(everylink.linkCondition!==null){
+		            	if(everylink.linkCondition.no!==null)
+		                string2 += '&&' +" !"+everylink.linkCondition.linkCondition.name+'(ctx)'
+		                else
+		                string2 += '&&' +everylink.linkCondition.linkCondition.name+'(ctx)'
+	                }
+	            } else if (everylink.link == 'or') {
+	            	if(everylink.condition.no!==null)
+		                string2 += '||' +" !"+everylink.condition.condition.compileTrueCondition
+		                else
+		                string2 += '||' +everylink.condition.condition.compileTrueCondition
+	                }
+	                if(everylink.linkCondition!==null){
+		            	if(everylink.linkCondition.no!==null)
+		                string2 += '||' +" !"+everylink.linkCondition.linkCondition.name+'(ctx)'
+		                else
+		                string2 += '||' +everylink.linkCondition.linkCondition.name+'(ctx)'
+	            }
+	        }
+	        string2 += ')'
+	        myString +='''
+	    «string1»
+	    	«string2» return true;
+	    	else return false;
+	    }
+	    '''
+	    }
+	    return myString
+	}
+	
+	
+	def compileOperationGo(Operation operation){
+		var myString = ''''''
+		for (everyoperation : operation.operates) {
+			var string1 = 'func ' + everyoperation.name + '() {'
+			var string2 = ''
+			if(everyoperation.firstOperation!==null)
+				string2=everyoperation.firstOperation.compileTrueOperate
+			else if(everyoperation.linkOperation!==null)
+				string2=everyoperation.linkOperation.name+'();'
+			var string3=''''''
+			for (everylink : everyoperation.andOrLink) {
+				if(everylink.firstOperation!==null)
+					string3+=everylink.firstOperation.compileTrueOperate
+				else if(everylink.linkOperation!==null)
+					string3+=everylink.linkOperation.name+'();'
+			 }
+			 myString+='''
+			 «string1»
+			 	«string2»
+			 	«string3»
+			 }
+			 '''
+		}
+		 return myString
+	}
+	
+	def compileRuleGo(RuleStructure structure)'''
+		«FOR i : structure.manyRuleExpression»
+			«i.compileManyRuleExpressionGo»
+		«ENDFOR»
+	'''
+	
+	def dispatch compileManyRuleExpressionGo(ParallelExpression expression)'''
+		«FOR i : expression.ruleExpression»
+			«i.compileRuleExpressionGo»
+		«ENDFOR»
+	'''
+	
+	def compileRuleExpressionGo(RuleExpression expression){
+		var String code=''''''
+		var string1=''
+		var string1_1=''
+		var link=''
+		var setDateString1=''
+		var setDateString2=''
+		if(expression.setdate!==null){
+			setDateString1='_year uint16, _months uint8, _days uint8, _hours uint8, _minutes uint8'
+			setDateString2=expression.setdate.message+'=convertToTimestamp(_year,_months,_days,_hours,_minutes);'
+		}
+		if(expression.setdate!==null&&expression.set!==null){
+			link=','
+		}
+		if(expression.repeat===null){
+		if( expression.set===null){
+			string1="func "+expression.name+"("+setDateString1+") {"
+			if(expression.totalOperation.person!==null)
+				string1_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else if(expression.totalOperation.person2!==null)
+				string1_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else
+				string1_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"		
+		}
+		if(expression.set!==null){
+			string1="func "+expression.name+"("+setDateString1+link+expression.set.compileMessageOperate+") {"
+			if(expression.totalOperation.person!==null)
+				string1_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else if(expression.totalOperation.person2!==null)
+				string1_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else
+				string1_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+		}
+		}
+		if(expression.repeat!==null){
+		if( expression.set===null){
+			string1="func "+expression.name+"("+setDateString1+") {"
+			if(expression.totalOperation.person!==null)
+				string1_1="if onlyState(ContractState){"
+			else if(expression.totalOperation.person2!==null)
+				string1_1="if onlyState(ContractState){"
+			else
+				string1_1="if onlyState(ContractState){"		
+		}
+		if(expression.set!==null){
+			string1="func "+expression.name+"("+setDateString1+link+expression.set.compileMessageOperate+") {"
+			if(expression.totalOperation.person!==null)
+				string1_1="if onlyState(ContractState){"
+			else if(expression.totalOperation.person2!==null)
+				string1_1="if onlyState(ContractState){"
+			else
+				string1_1="if onlyState(ContractState){"
+		}
+		}	
+		var string2=''''''
+		if(expression.set!==null)
+			string2+=expression.set.compileMessageOperateThing
+		var string3=''
+		if(expression.totalCondition!==null)
+			string3=string3+'if('+expression.totalCondition.compileTotalCondition+'){'
+		var string4=''''''	
+		string4+=expression.totalOperation.compileTotalOperation
+		
+		var string5=''''''
+		if(expression.subExpression!==null){
+			for(i: expression.subExpression){
+				var string6=''
+				var string7=''''''
+				var string8=''
+				var string9=''
+				if(i.totalExpression.totalCondition!==null)
+					string6+='if('+i.totalExpression.totalCondition.compileTotalCondition+'){'
+				string7+=i.totalExpression.totalOperation.compileTotalOperation
+				if(i.totalExpression.elseExpression!==null)
+					string8='''else{ 
+						«i.totalExpression.elseExpression.totalOperation.compileTotalOperation»
+						}'''
+				if(i.totalExpression.totalCondition!==null)
+					string9="}"
+				string5+='''
+				 	«string6»
+				 		«string7»
+				 	«string8»
+				 	«string9»
+				'''
+				}
+			}
+		
+		var string6="changeRule(\""+expression.name+"\");"
+		var string7=''''''
+		if(expression.totalCondition!==null)
+			string7="}"	
+		
+		code+='''
+		«string1»
+			«string1_1»
+			«setDateString2»
+			«string2»
+			«string3»
+				«string4»
+				«string5»
+				«string6»
+			«string7»
+		}
+		}
+		'''
+		
+		if(expression.elseExpression===null){
+			return code
+		}
+	
+		if(expression.elseExpression!==null){
+			var string8=''''''
+			var string9=''
+			var string9_1=''
+		if(expression.elseExpression.set===null){
+			string9="func else"+expression.name+"(){"
+			if(expression.elseExpression.totalOperation.person!==null)
+				string9_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else if(expression.totalOperation.person2!==null)
+				string9_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else
+				string9_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+		}
+		if(expression.elseExpression.set!==null){
+			string9="func else"+expression.name+"("+expression.elseExpression.set.compileMessageOperate+"){"
+			if(expression.elseExpression.totalOperation.person!==null)
+				string9_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else if(expression.totalOperation.person2!==null)
+				string9_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else
+				string9_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+		}
+		var onlyOne='''bool one=true;
+		if(one){
+		'''
+		var string10=''
+		var string11=''
+		var string12=''''''
+		var string13=''
+		if(expression.totalCondition!==null)
+			string10+='if(!('+expression.totalCondition.compileTotalCondition+')){'
+		string11+=expression.elseExpression.totalOperation.compileTotalOperation
+		if(expression.totalCondition!==null)
+			string13="}"
+		if(expression.totalCondition!==null)
+			string12="}"
+		string8='''
+			«string9»
+				«string9_1»
+				«onlyOne»
+				«string10»
+					«string11»
+				«string13»
+			«string12»
+		'''
+		code+='''
+			«string8»
+			one=false;
+			}
+		'''
+		return code
+		}
+	}
+		
+	def dispatch compileManyRuleExpressionGo(ExclusiveExpression expression)'''
+		«FOR i : expression.ruleExpression»
+			«i.compileExclusiveRuleExpressionGo»
+		«ENDFOR»
+	'''
+	
+	def compileExclusiveRuleExpressionGo(RuleExpression expression){
+		var String code=''''''
+		var string1=''
+		var string1_1=''
+		var link=''
+		var setDateString1=''
+		var setDateString2=''
+		if(expression.setdate!==null){
+			setDateString1='_year uint16, _months uint8, _days uint8, _hours uint8, _minutes uint8'
+			setDateString2=expression.setdate.message+'=convertToTimestamp(_year,_months,_days,_hours,_minutes);'
+		}
+		if(expression.setdate!==null&&expression.set!==null){
+			link=','
+		}
+		if(expression.repeat===null){
+		if( expression.set===null){
+			string1="func "+expression.name+"("+setDateString1+") {"
+			if(expression.totalOperation.person!==null)
+				string1_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else if(expression.totalOperation.person2!==null)
+				string1_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else
+				string1_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"		
+		}
+		if(expression.set!==null){
+			string1="func "+expression.name+"("+setDateString1+link+expression.set.compileMessageOperate+") {"
+			if(expression.totalOperation.person!==null)
+				string1_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else if(expression.totalOperation.person2!==null)
+				string1_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else
+				string1_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+		}
+		}
+		if(expression.repeat!==null){
+		if( expression.set===null){
+			string1="func "+expression.name+"("+setDateString1+") {"
+			if(expression.totalOperation.person!==null)
+				string1_1="if onlyState(ContractState){"
+			else if(expression.totalOperation.person2!==null)
+				string1_1="if onlyState(ContractState){"
+			else
+				string1_1="if onlyState(ContractState){"		
+		}
+		if(expression.set!==null){
+			string1="func "+expression.name+"("+setDateString1+link+expression.set.compileMessageOperate+") {"
+			if(expression.totalOperation.person!==null)
+				string1_1="if onlyState(ContractState){"
+			else if(expression.totalOperation.person2!==null)
+				string1_1="if onlyState(ContractState){"
+			else
+				string1_1="if onlyState(ContractState){"
+		}
+		}	
+		var string2=''''''
+		if(expression.set!==null)
+			string2+=expression.set.compileMessageOperateThing
+		var string3=''
+		if(expression.totalCondition!==null)
+			string3=string3+'if('+expression.totalCondition.compileTotalCondition+'){'
+		var string4=''''''	
+		string4+=expression.totalOperation.compileTotalOperation
+		
+		var string5=''''''
+		if(expression.subExpression!==null){
+			for(i: expression.subExpression){
+				var string6=''
+				var string7=''''''
+				var string8=''
+				var string9=''
+				if(i.totalExpression.totalCondition!==null)
+					string6+='if('+i.totalExpression.totalCondition.compileTotalCondition+'){'
+				string7+=i.totalExpression.totalOperation.compileTotalOperation
+				if(i.totalExpression.elseExpression!==null)
+					string8='''else{ 
+						«i.totalExpression.elseExpression.totalOperation.compileTotalOperation»
+						}'''
+				if(i.totalExpression.totalCondition!==null)
+					string9="}"
+				string5+='''
+				 	«string6»
+				 		«string7»
+				 	«string8»
+				 	«string9»
+				'''
+				}
+			}
+		
+		var string6="changeRule(\""+expression.name+"\");"
+		var string7=''''''
+		if(expression.totalCondition!==null)
+			string7="}"	
+		
+		code+='''
+		«string1»
+			«string1_1»
+			«setDateString2»
+			«string2»
+			«string3»
+				«string4»
+				«string5»
+				«string6»
+			«string7»
+		}
+		}
+		'''
+		
+		if(expression.elseExpression===null){
+			return code
+		}
+	
+		if(expression.elseExpression!==null){
+			var string8=''''''
+			var string9=''
+			var string9_1=''
+		if(expression.elseExpression.set===null){
+			string9="func else"+expression.name+"(){"
+			if(expression.elseExpression.totalOperation.person!==null)
+				string9_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else if(expression.totalOperation.person2!==null)
+				string9_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else
+				string9_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+		}
+		if(expression.elseExpression.set!==null){
+			string9="func else"+expression.name+"("+expression.elseExpression.set.compileMessageOperate+"){"
+			if(expression.elseExpression.totalOperation.person!==null)
+				string9_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else if(expression.totalOperation.person2!==null)
+				string9_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+			else
+				string9_1="if onlyState(ContractState)&&!functionStatus["+expression.name+"]{"
+		}
+		var onlyOne='''bool one=true;
+		if(one){
+		'''
+		var string10=''
+		var string11=''
+		var string12=''''''
+		var string13=''
+		if(expression.totalCondition!==null)
+			string10+='if(!('+expression.totalCondition.compileTotalCondition+')){'
+		string11+=expression.elseExpression.totalOperation.compileTotalOperation
+		if(expression.totalCondition!==null)
+			string13="}"
+		if(expression.totalCondition!==null)
+			string12="}"
+		string8='''
+			«string9»
+				«string9_1»
+				«onlyOne»
+				«string10»
+					«string11»
+				«string13»
+			«string12»
+		'''
+		code+='''
+			«string8»
+			one=false;
+			}
+		'''
+		return code
+		}
+	}
+	
+	def dispatch compileManyRuleExpressionGo(RegularRuleExpression expression)'''
+		«FOR i : expression.ruleExpression»
+			«i.compileRuleExpressionGo»
+		«ENDFOR»
+	'''
+	
+	def dispatch compileManyRuleExpressionGo(AdditionExpression expression)'''
+		«FOR i : expression.ruleExpression»
+			«i.compileAdditionalRuleExpressionGo»
+		«ENDFOR»
+	'''
+	
+	def compileAdditionalRuleExpressionGo(RuleExpression expression){
+		var String code=''''''
+		var string1=''
+		var string1_1=''
+		var link=''
+		var setDateString1=''
+		var setDateString2=''
+		if(expression.setdate!==null){
+			setDateString1='_year uint16, _months uint8, _days uint8, _hours uint8, _minutes uint8'
+			setDateString2=expression.setdate.message+'=convertToTimestamp(_year,_months,_days,_hours,_minutes);'
+		}
+		if(expression.setdate!==null&&expression.set!==null){
+			link=','
+		}
+		if(expression.repeat===null){
+		if( expression.set===null){
+			string1="func "+expression.name+"("+setDateString1+") {"
+			if(expression.totalOperation.person!==null)
+				string1_1="if !functionStatus["+expression.name+"]{"
+			else if(expression.totalOperation.person2!==null)
+				string1_1="if !functionStatus["+expression.name+"]{"
+			else
+				string1_1="if !functionStatus["+expression.name+"]{"		
+		}
+		if(expression.set!==null){
+			string1="func "+expression.name+"("+setDateString1+link+expression.set.compileMessageOperate+") {"
+			if(expression.totalOperation.person!==null)
+				string1_1="if !functionStatus["+expression.name+"]{"
+			else if(expression.totalOperation.person2!==null)
+				string1_1="if !functionStatus["+expression.name+"]{"
+			else
+				string1_1="if !functionStatus["+expression.name+"]{"
+		}
+		}
+		if(expression.repeat!==null){
+		if( expression.set===null){
+			string1="func "+expression.name+"("+setDateString1+") {"
+			if(expression.totalOperation.person!==null)
+				string1_1="if true{"
+			else if(expression.totalOperation.person2!==null)
+				string1_1="if true{"
+			else
+				string1_1="if true{"		
+		}
+		if(expression.set!==null){
+			string1="func "+expression.name+"("+setDateString1+link+expression.set.compileMessageOperate+") {"
+			if(expression.totalOperation.person!==null)
+				string1_1="if true{"
+			else if(expression.totalOperation.person2!==null)
+				string1_1="if true{"
+			else
+				string1_1="if true{"
+		}
+		}	
+		var string2=''''''
+		if(expression.set!==null)
+			string2+=expression.set.compileMessageOperateThing
+		var string3=''
+		if(expression.totalCondition!==null)
+			string3=string3+'if('+expression.totalCondition.compileTotalCondition+'){'
+		var string4=''''''	
+		string4+=expression.totalOperation.compileTotalOperation
+		
+		var string5=''''''
+		if(expression.subExpression!==null){
+			for(i: expression.subExpression){
+				var string6=''
+				var string7=''''''
+				var string8=''
+				var string9=''
+				if(i.totalExpression.totalCondition!==null)
+					string6+='if('+i.totalExpression.totalCondition.compileTotalCondition+'){'
+				string7+=i.totalExpression.totalOperation.compileTotalOperation
+				if(i.totalExpression.elseExpression!==null)
+					string8='''else{ 
+						«i.totalExpression.elseExpression.totalOperation.compileTotalOperation»
+						}'''
+				if(i.totalExpression.totalCondition!==null)
+					string9="}"
+				string5+='''
+				 	«string6»
+				 		«string7»
+				 	«string8»
+				 	«string9»
+				'''
+				}
+			}
+		
+		var string6="changeRule(\""+expression.name+"\");"
+		var string7=''''''
+		if(expression.totalCondition!==null)
+			string7="}"	
+		
+		code+='''
+		«string1»
+			«string1_1»
+			«setDateString2»
+			«string2»
+			«string3»
+				«string4»
+				«string5»
+				«string6»
+			«string7»
+		}
+		}
+		'''
+		
+		if(expression.elseExpression===null){
+			return code
+		}
+	
+		if(expression.elseExpression!==null){
+			var string8=''''''
+			var string9=''
+			var string9_1=''
+		if(expression.elseExpression.set===null){
+			string9="func else"+expression.name+"(){"
+			if(expression.elseExpression.totalOperation.person!==null)
+				string9_1="if !functionStatus["+expression.name+"]{"
+			else if(expression.totalOperation.person2!==null)
+				string9_1="if !functionStatus["+expression.name+"]{"
+			else
+				string9_1="if !functionStatus["+expression.name+"]{"
+		}
+		if(expression.elseExpression.set!==null){
+			string9="func else"+expression.name+"("+expression.elseExpression.set.compileMessageOperate+"){"
+			if(expression.elseExpression.totalOperation.person!==null)
+				string9_1="if !functionStatus["+expression.name+"]{"
+			else if(expression.totalOperation.person2!==null)
+				string9_1="if !functionStatus["+expression.name+"]{"
+			else
+				string9_1="if !functionStatus["+expression.name+"]{"
+		}
+		var onlyOne='''bool one=true;
+		if(one){
+		'''
+		var string10=''
+		var string11=''
+		var string12=''''''
+		var string13=''
+		if(expression.totalCondition!==null)
+			string10+='if(!('+expression.totalCondition.compileTotalCondition+')){'
+		string11+=expression.elseExpression.totalOperation.compileTotalOperation
+		if(expression.totalCondition!==null)
+			string13="}"
+		if(expression.totalCondition!==null)
+			string12="}"
+		string8='''
+			«string9»
+				«string9_1»
+				«onlyOne»
+				«string10»
+					«string11»
+				«string13»
+			«string12»
+		'''
+		code+='''
+			«string8»
+			one=false;
+			}
+		'''
+		return code
+		}
+	}
+	
+	def compileRequireGo(Require require)'''
+		«FOR i :  require.value»
+			«IF i == "isTime"»
+			    // 用于判断是否达到指定时间的函数
+			    func isTime(targetTime int) bool {
+			        return time.Now() >= targetTime;
+			    }
+			«ELSEIF i == "logic"»
+				// 辅助函数，根据比较符号执行比较
+				func logic(a, b uint, op string) bool {
+				    switch op {
+				    case "<":
+				    	return a < b
+				   	case "<=":
+				   		return a <= b
+				   	case "==":
+				   		return a == b
+				   	case "!=":
+				    	return a != b
+				    case ">":
+				    	return a > b
+				    case ">=":
+				    	return a >= b
+				    default:
+				    	// 如果操作符不匹配任何支持的操作符，则返回 false 或者其他适当的值。
+				    	return false
+				    }
+				}
+			«ELSEIF i == "check"»
+				func check(contractName string) bool {
+					return true;
+				}
+			«ELSEIF i == "isDone"»
+			    // 检查某个功能是否已经执行
+			    func isDone(functionName string) bool {
+			        return functionStatus[functionName];
+			    }
+			«ELSEIF i == "SetDate"»
+			    // isLeapYear 判断给定的年份是否是闰年
+			    func isLeapYear(year uint16) bool {
+			    	if year%4 != 0 {
+			    		return false
+			    	}
+			    	if year%100 != 0 {
+			    		return true
+			    	}
+			    	if year%400 != 0 {
+			    		return false
+			    	}
+			    	return true
+			    }
+			    
+			    // getDaysInMonth 根据给定的月份和年份返回该月的天数
+			    func getDaysInMonth(month uint8, year uint16) uint8 {
+			    	switch month {
+			    	case 1, 3, 5, 7, 8, 10, 12:
+			    		return 31
+			    	case 4, 6, 9, 11:
+			    		return 30
+			    	default:
+			    		if isLeapYear(year) {
+			    			return 29
+			    		}
+			    		return 28
+			    	}
+			    }
+			    
+			    // convertToTimestamp 将给定的日期和时间转换为Unix时间戳
+			    func convertToTimestamp(year uint16, month uint8, day uint8, hour uint8, minute uint8) uint64 {
+			    	// 检查参数的有效性
+			    	if year < 1970 || month < 1 || month > 12 || day < 1 || day > getDaysInMonth(month, year) || hour > 23 || minute > 59 {
+			    		panic("Invalid input parameters")
+			    	}
+			    
+			    	var timestamp uint64
+			    	// 计算年份之前的天数
+			    	for y := uint16(1970); y < year; y++ {
+			    		if isLeapYear(y) {
+			    			timestamp += 366 * 24 * 60 * 60
+			    		} else {
+			    			timestamp += 365 * 24 * 60 * 60
+			    		}
+			    	}
+			    	// 计算月份之前的天数
+			    	for m := uint8(1); m < month; m++ {
+			    		timestamp += uint64(getDaysInMonth(m, year)) * 24 * 60 * 60
+			    	}
+			    	// 加上日、小时和分钟的秒数
+			    	timestamp += uint64((day-1)*24*60*60 + hour*60*60 + minute*60)
+			    
+			    	return timestamp
+			    }
+			«ELSEIF i == "timeSub"»
+			     // compareTimestamps 比较两个时间戳，并根据给定的操作符和自定义秒数返回布尔值
+			     func compareTimestamps(timestamp1 uint64, timestamp2 uint64, customSeconds uint64, operator string) bool {
+			     	// 计算两个时间戳的差值（取绝对值）
+			     	var timeDifference uint64
+			     	if timestamp1 > timestamp2 {
+			     		timeDifference = timestamp1 - timestamp2
+			     	} else {
+			     		timeDifference = timestamp2 - timestamp1
+			     	}
+			     
+			     	// 判断操作符并执行相应的比较
+			     	switch strings.TrimSpace(operator) {
+			     	case ">":
+			     		return timeDifference > customSeconds
+			     	case "<":
+			     		return timeDifference < customSeconds
+			     	case "==":
+			     		return timeDifference == customSeconds
+			     	case "!==":
+			     		return timeDifference != customSeconds
+			     	default:
+			     		panic("Invalid operator")
+			     	}
+			     }
+			«ELSEIF i == "transfer"»
+				// transferTo 用于给指定地址转账并执行模拟支付流程
+				func transferTo(ctx *Context, recipient Person, amount uint) error {
+					if recipient == "" {
+						return fmt.Errorf("Invalid recipient address")
+					}
+					if amount <= 0 {
+						return fmt.Errorf("Amount must be greater than zero")
+					}
+				
+					// 获取调用者的余额
+					user := ctx.Get("user").(*Person)
+					callerBalance, err := user.Balance
+					if err != nil {
+						return fmt.Errorf("获取调用方余额失败: %v", err)
+					}
+				
+					// 获取接收方余额
+					recipientBalance, err := recipient.Balance
+					if err != nil {
+						return fmt.Errorf("获取接收方余额失败: %v", err)
+					}
+				
+					// 确保调用方有足够的余额支付
+					if callerBalance < amount {
+						return fmt.Errorf("调用方余额不足")
+					}
+				
+					// 扣除调用方的金额
+					callerBalance -= amount
+				
+					// 增加接收方的金额
+					recipientBalance += amount
+				
+					// 更新账户余额
+					if err := ctx.GetStub().PutState(user, callerBalance); err != nil {
+						return fmt.Errorf("更新调用方余额失败: %v", err)
+					}
+				
+					if err := ctx.GetStub().PutState(recipient, recipientBalance); err != nil {
+						return fmt.Errorf("更新接收方余额失败: %v", err)
+					}
+					return nil
+				}
+			«ELSEIF i == "compareStrings"»
+				func compareStrings(str1, str2 string) bool {
+				    return str1 == str2
+				}
+			«ENDIF»
+		    «ENDFOR»
+		'''
+	
+	def dispatch compileManyRuleGo(AdditionExpression expression)''''''
+	def dispatch compileManyRuleGo(RegularRuleExpression expression)''''''
+	def dispatch compileManyRuleGo(ParallelExpression expression)''''''
+	def dispatch compileManyRuleGo(ExclusiveExpression expression){
+		var String code=''''''
+		var String varvalue=""
+		var String string01='var myBoolean'+exclu+' bool := true'
+		var String string02=''''''
+		var j=0
+		for(rule : expression.ruleExpression){
+			if(expression.ruleExpression.get(j).set!==null)
+			varvalue=varvalue+','+expression.ruleExpression.get(j).set.everymassage.defineMessage2
+			j=j+1
+		}
+		var String string1=""
+		string1=string1+"func exclusive"+exclu+" (_choice int"+ varvalue+")"+"{"
+		var String string2=""
+		string2="var choice int := _choice;"
+		var i=0
+		var String code2=''''''
+		for( rule : expression.ruleExpression){
+		var String string3=""
+		var String string4=""
+		string3="if(choice=="+i+"&& myBoolean"+exclu+"){"
+		if(expression.ruleExpression.get(i).set!==null)
+			string4=expression.ruleExpression.get(i).name+"("+expression.ruleExpression.get(i).set.everymassage.defineMessage+");"
+		else
+			string4=expression.ruleExpression.get(i).name+"();"
+		code2+='''
+		«string3»
+			«string4»
+			myBoolean«exclu» = false
+			}
+		'''
+		i=i+1
+		}
+		exclu=exclu+1
+		code+='''
+		«string01»
+			«string02»
+		«string1»
+			«string2»
+			«code2»
+		}
+		'''
+		return code
+}
+	
 		
 	def compileSolidity(Model model)'''
 		// SPDX-License-Identifier: MIT
@@ -160,25 +1268,17 @@ class SparrowGenerator extends AbstractGenerator {
 		        _;
 		    }
 			event ContractStateChange(string newState);
-			
-			// Custom modifier: Allow or prohibit execution based on string parameter value
+			// Custom modifier: allow or restrict execution based on the value of a string parameter
 			modifier onlyState(string memory State) {
 			    require(compareStrings(State, "start") || compareStrings(State, "restart"), "Not allowed in this state");
 			     emit ContractStateChange(State);
 			    _;
 			}
-			
-			// Helper function to compare if two strings are equal
+			// Helper function to compare whether two strings are equal
 			function compareStrings(string memory a, string memory b) internal pure returns (bool) {
 			    return (keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b)));
 			}
 			
-			// Each clause calls a fixed function, changes the clause state after execution, and records events and time
-			function changeRule(string memory ruleName) internal {
-				functionStatus[ruleName] = true;
-				functionFinishTime[ruleName]=block.timestamp;
-				emit completedRule(msg.sender,ruleName);
-		}
 		}
 	'''
 	
@@ -260,12 +1360,12 @@ class SparrowGenerator extends AbstractGenerator {
 	def compileRequire(Require require)'''
 		«FOR i :  require.value»
 			«IF i == "isTime"»
-			    // Function to determine if the specified time has been reached
+			    // Check if the current time reaches the target time
 			    function isTime(uint256 targetTime) internal view returns (bool) {
 			        return block.timestamp >= targetTime;
 			    }
 			«ELSEIF i == "logic"»
-				// Helper function to perform comparison based on the comparison operator
+				// Helper function to perform comparisons based on a comparison operator
 				    function compare(uint a, uint b, string memory op) internal pure returns (bool) {
 				        if (compareStrings(op, ">")) {
 				            return a > b;
@@ -284,7 +1384,7 @@ class SparrowGenerator extends AbstractGenerator {
 				    }
 				
 				
-				    // The setValue function can only be executed if the condition valueA > valueB is met
+				    // Only allow execution of the setValue function if the condition valueA > valueB is met
 				    function logic(uint256 valueA, uint256 valueB, string memory symbol) internal pure returns (bool) {
 				        return compare(valueA, valueB, symbol);
 				    }
@@ -293,7 +1393,7 @@ class SparrowGenerator extends AbstractGenerator {
 					return true;
 				}
 			«ELSEIF i == "isDone"»
-			    // Check if a specific function has been executed
+			    // Check whether a specific function has already been executed
 			    function isDone(string memory functionName) internal view returns (bool) {
 			        return functionStatus[functionName];
 			    }
@@ -351,7 +1451,7 @@ class SparrowGenerator extends AbstractGenerator {
 				    }
 			«ELSEIF i == "timeSub"»
 			     function compareTimestamps(uint256 timestamp1, uint256 timestamp2, uint256 customSeconds, string memory operator) internal pure returns (bool) {
-			            // Calculate the difference between two timestamps (take the absolute value to ensure the difference is positive)
+			            // Calculate the difference between two timestamps (take absolute value to ensure the result is positive)
 			            uint256 timeDifference = timestamp1 - timestamp2;
 			            if (keccak256(bytes(operator)) == keccak256(bytes(">"))) {
 			                return timeDifference > customSeconds;
@@ -367,7 +1467,7 @@ class SparrowGenerator extends AbstractGenerator {
 			        }
 			«ELSEIF i == "transfer"»
 				event Transfer(address indexed from, address indexed to, uint amount);
-				// Transfer to a specified address
+				// Used to transfer funds to a specified address
 				function transferTo(address payable recipient, uint amount) internal {
 				    require(recipient != address(0), "Invalid recipient address");
 				    require(amount > 0, "Amount must be greater than zero");
@@ -397,7 +1497,7 @@ class SparrowGenerator extends AbstractGenerator {
 	'''
 
 	def compileSubject(Subject subject) '''
-«««	Build the struct
+«««	建立结构体
 	struct «subject.name» {
 		«IF subject.type != "CA"»
 		string name;
@@ -426,7 +1526,7 @@ class SparrowGenerator extends AbstractGenerator {
 	}
 	
 	def compileObject(Object object)'''
-	«««	Build the struct
+	«««	建立结构体
 	struct «object.name» {
 		   «object.objectExpression.compileObjectExpression»
 	}
@@ -444,18 +1544,18 @@ class SparrowGenerator extends AbstractGenerator {
 }
 	
 	def compileInit(Initialize init){'''
-«««Initialize the Subject
+«««初始化主体
 		«FOR sinit:init.inits»
 			«sinit.subtype.name» public «sinit.name» = «sinit.subtype.name»(«sinit.value.compilevaluelist»);
 		«ENDFOR»
-«««Build the corresponding modifier
+«««建立相应的modifier
 		«FOR sinit:init.inits»
 			modifier only«sinit.name»(){
 				require(msg.sender == «sinit.name».account,"Only «sinit.name» can access this.");
 				 _; 
 			}
 		«ENDFOR»
-«««Initialize the Object
+«««初始化客体
 		«FOR oinit:init.inito»
 			«oinit.obtype.name» public «oinit.name» = «oinit.obtype.name»(«oinit.value.compilevaluelist»);
 		«ENDFOR»
@@ -548,7 +1648,7 @@ class SparrowGenerator extends AbstractGenerator {
 		//string1=group.subtype.name+'[] public '+group.name+'=['+string1+'];'
 		string1=group.subtype.name+'[] public '+group.name+';'
 		var string2='''
-		// Modifier: Only allows any one address from a group of structs to execute
+		// Modifier: restrict execution to any one address within a group of structs
 		    modifier only«group.name»() {
 		        bool found = false;
 		        for (uint256 i = 0; i < «group.name».length; i++) {
@@ -866,14 +1966,45 @@ class SparrowGenerator extends AbstractGenerator {
 	
 	def dispatch compileTrueOperateThing(transferExpression operation)''''''
 	
-	def compileMessageOperateThing(messageExpression operation)'''
-		«FOR i : operation.everymassage»
-		 «IF i.symbol ===null»
-			«i.message» = _«i.message»;
-		«ELSE»
-			«i.type» «i.message» = _«i.message»;	
-		«ENDIF»
-		«ENDFOR»   
+//	def compileMessageOperateThing(messageExpression operation)'''
+//		«FOR i : operation.everymassage»
+//		 «IF i.symbol ===null»
+//			«i.message» = _«i.message»;
+//		«ELSE»
+//			«i.type» «i.message» = _«i.message»;	
+//		«ENDIF»
+//		«ENDFOR»   
+//	'''
+	
+//	def compileMessageOperateThing(messageExpression operation) '''
+//	    «FOR i : operation.everymassage»
+//	        «IF i.symbol === null»
+//	            «i.message» = _«i.message»;
+//	        «ELSE»
+//	            «IF i.type == "ufixed"»
+//	                uint256 «i.message» = uint256(_«i.message»);  // 转换为 uint256
+//	            «ELSE»
+//	                «i.type» «i.message» = _«i.message»;   // 使用正确的类型进行赋值
+//	            «ENDIF»
+//	        «ENDIF»
+//	    «ENDFOR»
+//	'''
+	
+	
+	def compileMessageOperateThing(messageExpression operation) '''
+	    «FOR i : operation.everymassage»
+	        «IF i.symbol === null»
+	            «i.message» = _«i.message»;  
+	        «ELSE»
+	            «IF i.type == "ufixed"»
+	                uint256 «i.message» = uint256(_«i.message»);  // converted to uint256
+	             «ELSEIF i.type == "string"»
+	                string memory «i.message» = "«i.message»"; 
+	            «ELSE»
+	                «i.type» «i.message» = _«i.message»;   // Assign using the correct data type
+	            «ENDIF»
+	        «ENDIF»
+	    «ENDFOR»
 	'''
 	
 	def dispatch compileTrueOperateThing(changeExpression operation)''''''
@@ -990,10 +2121,10 @@ class SparrowGenerator extends AbstractGenerator {
 				}
 			}
 		
-//		var string6="functionStatus[\""+expression.name+"\"] = true;"
-//		var string63="functionFinishTime[\""+expression.name+"\"]=block.timestamp;"
-//		var string62="emit completedRule(msg.sender,\""+expression.name+"\");"
-		var string6="changeRule(\""+expression.name+"\");"
+		var string6="functionStatus[\""+expression.name+"\"] = true;"
+		var string63="functionFinishTime[\""+expression.name+"\"]=block.timestamp;"
+		var string62="emit completedRule(msg.sender,\""+expression.name+"\");"
+//		var string6="changeRule(\""+expression.name+"\");"
 		var string7=''''''
 		if(expression.totalCondition!==null)
 			string7="}"	
@@ -1006,8 +2137,8 @@ class SparrowGenerator extends AbstractGenerator {
 				«string4»
 				«string5»
 				«string6»
-«««				«string63»
-«««				«string62»
+				«string63»
+				«string62»
 			«string7»
 		}
 		'''
@@ -1146,10 +2277,10 @@ class SparrowGenerator extends AbstractGenerator {
 				}
 			}
 		
-//		var string6="functionStatus[\""+expression.name+"\"] = true;"
-//		var string63="functionFinishTime[\""+expression.name+"\"]=block.timestamp;"
-//		var string62="emit completedRule(msg.sender,\""+expression.name+"\");"
-		var string6="changeRule(\""+expression.name+"\");"
+		var string6="functionStatus[\""+expression.name+"\"] = true;"
+		var string63="functionFinishTime[\""+expression.name+"\"]=block.timestamp;"
+		var string62="emit completedRule(msg.sender,\""+expression.name+"\");"
+//		var string6="changeRule(\""+expression.name+"\");"
 		var string7=''''''
 		if(expression.totalCondition!==null)
 			string7="}"	
@@ -1162,8 +2293,8 @@ class SparrowGenerator extends AbstractGenerator {
 				«string4»
 				«string5»
 				«string6»
-«««				«string63»
-«««				«string62»
+				«string63»
+				«string62»
 			«string7»
 		}
 		'''
@@ -1301,10 +2432,10 @@ class SparrowGenerator extends AbstractGenerator {
 				}
 			}
 		
-//		var string6="functionStatus[\""+expression.name+"\"] = true;"
-//		var string63="functionFinishTime[\""+expression.name+"\"]=block.timestamp;"
-//		var string62="emit completedRule(msg.sender,\""+expression.name+"\");"
-		var string6="changeRule(\""+expression.name+"\");"
+		var string6="functionStatus[\""+expression.name+"\"] = true;"
+		var string63="functionFinishTime[\""+expression.name+"\"]=block.timestamp;"
+		var string62="emit completedRule(msg.sender,\""+expression.name+"\");"
+//		var string6="changeRule(\""+expression.name+"\");"
 		var string7=''''''
 		if(expression.totalCondition!==null)
 			string7="}"	
@@ -1317,8 +2448,8 @@ class SparrowGenerator extends AbstractGenerator {
 				«string4»
 				«string5»
 				«string6»
-«««				«string63»
-«««				«string62»
+				«string63»
+				«string62»
 			«string7»
 		}
 		'''
@@ -1658,7 +2789,7 @@ class SparrowGenerator extends AbstractGenerator {
 			return "!isTime("+timepoint.value.name+")"
 	}
 	
-	// Time conversion function
+	//时间转换方法
 	def  boolean isLeapYear(int year){
         if (year % 4 != 0) {
             return false;
